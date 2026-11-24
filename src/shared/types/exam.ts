@@ -1,0 +1,48 @@
+export type QuestionType = 'single' | 'multiple';
+export type ExamStatus = 'draft' | 'published';
+
+export interface QuestionOption {
+  id: string;
+  text: string;
+}
+
+/** Question as a candidate sees it. Never carries the answer key. */
+export interface PublicQuestion {
+  id: string;
+  type: QuestionType;
+  text: string;
+  options: QuestionOption[];
+  marks: number;
+}
+
+/** Question including the answer key. Only sent to admins, or after submission. */
+export interface Question extends PublicQuestion {
+  correctOptionIds: string[];
+  explanation: string;
+}
+
+export interface ExamSummary {
+  id: string;
+  title: string;
+  subject: string;
+  description: string;
+  durationMinutes: number;
+  passPercentage: number;
+  /** Fraction of a question's marks deducted for a wrong answer (0 = none). */
+  negativeMarking: number;
+  status: ExamStatus;
+  questionCount: number;
+  totalMarks: number;
+}
+
+export interface Exam extends Omit<ExamSummary, 'questionCount' | 'totalMarks'> {
+  questions: Question[];
+}
+
+export type ExamInput = Omit<Exam, 'id'>;
+
+/** An exam as listed to a candidate. */
+export interface StudentExam extends ExamSummary {
+  /** Set while the candidate has an unfinished attempt. */
+  activeAttemptId: string | null;
+}

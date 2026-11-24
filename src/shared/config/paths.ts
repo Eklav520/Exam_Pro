@@ -1,0 +1,35 @@
+/** Single source of truth for URLs. `path.x` is a route pattern, `to.x()` builds a link. */
+export const path = {
+  home: '/',
+  login: '/login',
+  dashboard: '/dashboard',
+  exams: '/exams',
+  examDetail: '/exams/:examId',
+  attempt: '/attempts/:attemptId',
+  results: '/results',
+  resultDetail: '/results/:attemptId',
+
+  admin: '/admin',
+  adminDashboard: '/admin/dashboard',
+  adminExams: '/admin/exams',
+  adminExamNew: '/admin/exams/new',
+  adminExamEdit: '/admin/exams/:examId/edit',
+  adminQuestionPapers: '/admin/question-papers',
+  adminApprovals: '/admin/approvals',
+  adminMonitoring: '/admin/monitoring',
+  adminEvaluation: '/admin/evaluation',
+  adminAllocation: '/admin/evaluation/allocation',
+  adminWorkspace: '/admin/evaluation/workspace',
+  adminFinalApproval: '/admin/evaluation/final-approval',
+  adminResults: '/admin/results',
+  adminUsers: '/admin/users',
+  adminReports: '/admin/reports',
+  adminSettings: '/admin/settings',
+} as const;
+
+export const to = {
+  examDetail: (examId: string) => `/exams/${examId}`,
+  attempt: (attemptId: string) => `/attempts/${attemptId}`,
+  resultDetail: (attemptId: string) => `/results/${attemptId}`,
+  adminExamEdit: (examId: string) => `/admin/exams/${examId}/edit`,
+} as const;

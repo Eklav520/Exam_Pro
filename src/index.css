@@ -1,0 +1,65 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/figtree';
+
+@theme {
+  --font-sans: 'Figtree Variable', 'Segoe UI', system-ui, sans-serif;
+
+  --color-canvas: #f4f7f9;
+  --color-surface: #ffffff;
+  --color-line: #dde4ec;
+  --color-table-head: #e9eff7;
+  --color-ink: #0c1f38;
+  --color-muted: #51607a;
+
+  --color-brand-50: #def4f4;
+  --color-brand-600: #0b8577;
+  --color-brand-700: #00746a;
+  --color-brand-800: #005f5b;
+
+  --color-navy-800: #0a2342;
+  --color-navy-900: #021a33;
+  --color-avatar: #0d47a1;
+
+  --color-info: #1558a6;
+  --color-info-soft: #e4effd;
+  --color-violet: #4b3a9b;
+  --color-violet-soft: #ece8fb;
+
+  --color-success: #1b6b3a;
+  --color-success-soft: #e1f3e7;
+  --color-danger: #b4332c;
+  --color-danger-strong: #8f241e;
+  --color-danger-soft: #fbe9e7;
+  --color-warning: #85540a;
+  --color-warning-soft: #fdf0d6;
+}
+
+@layer base {
+  body {
+    @apply bg-canvas text-ink antialiased;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
+}
+
+@layer components {
+  .control {
+    @apply block w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink;
+  }
+
+  select.control {
+    @apply appearance-none bg-no-repeat pr-9;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%230c1f38' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+  }
+
+  .control[aria-invalid='true'] {
+    @apply border-danger;
+  }
+}
