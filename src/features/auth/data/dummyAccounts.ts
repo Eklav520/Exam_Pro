@@ -17,7 +17,6 @@ const staff = (id: string, label: string, name: string, staffRole: StaffRole): D
 });
 
 export const dummyAccounts: DummyAccount[] = [
-  staff('u-mainadmin', 'Main Admin', 'Maya Anand', 'main_admin'),
   staff('u-admin', 'Admin', 'Alex Dsouza', 'admin'),
   staff('u-official', 'Higher Official', 'Hari Om', 'higher_official'),
   staff('u-evaluator', 'Evaluator', 'R. Kumar', 'evaluator'),

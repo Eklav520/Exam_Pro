@@ -8,7 +8,7 @@ import { makeStore } from '@/app/store';
 interface RenderAppOptions {
   route?: string;
   /** Mock user to sign in as. */
-  as?: 'u-student' | 'u-mainadmin' | 'u-admin' | 'u-official' | 'u-evaluator';
+  as?: 'u-student' | 'u-admin' | 'u-official' | 'u-evaluator';
 }
 
 /** Renders the whole app against the mock API. */

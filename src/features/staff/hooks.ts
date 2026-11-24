@@ -2,7 +2,7 @@ import { useCurrentUser } from '@/features/auth';
 import { staffRoles } from './model/staffRoles';
 
 export function useStaffRole() {
-  // The backend has a single "admin" role for now; treat it as the Main Admin.
-  const id = useCurrentUser()?.staffRole ?? 'main_admin';
+  // The backend does not send a staff role yet.
+  const id = useCurrentUser()?.staffRole ?? 'admin';
   return { id, ...staffRoles[id] };
 }

@@ -11,16 +11,10 @@ interface StaffRoleConfig {
 }
 
 export const staffRoles: Record<StaffRole, StaffRoleConfig> = {
-  main_admin: {
-    label: 'Main Admin',
-    initials: 'MA',
-    home: path.adminDashboard,
-    evaluation: path.adminFinalApproval,
-  },
   admin: {
     label: 'Admin',
     initials: 'AD',
-    home: path.adminQuestionPapers,
+    home: path.adminDashboard,
     evaluation: path.adminAllocation,
   },
   higher_official: {

@@ -17,8 +17,7 @@ This uses dummy accounts and an in-browser mock API, so no backend is needed. Th
 
 | Role            | Email                    | Opens on                |
 | --------------- | ------------------------ | ----------------------- |
-| Main Admin      | `mainadmin@exampro.test` | Dashboard               |
-| Admin           | `admin@exampro.test`     | Question Papers         |
+| Admin           | `admin@exampro.test`     | Dashboard               |
 | Higher Official | `official@exampro.test`  | Question Paper Approval |
 | Evaluator       | `evaluator@exampro.test` | Evaluation Workspace    |
 | Student         | `student@exampro.test`   | Secure Exam Launch      |
@@ -37,7 +36,7 @@ npm run dev        # http://localhost:5000
 npm run dev:api    # http://localhost:3000
 ```
 
-The dev server forwards `/api` to `http://localhost:5000`. Set the `API_PROXY_TARGET` environment variable to use another address. The backend has a single admin role for now, which is shown as Main Admin.
+The dev server forwards `/api` to `http://localhost:5000`. Set the `API_PROXY_TARGET` environment variable to use another address. The backend does not send staff roles yet, so every admin account is shown as Admin.
 
 ## Scripts
 

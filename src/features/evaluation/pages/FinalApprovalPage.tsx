@@ -14,6 +14,7 @@ import {
   usePreviewAction,
   type Column,
 } from '@/shared/ui';
+import { EvaluationNav } from '../components/EvaluationNav';
 import { CandidateReview } from '../components/CandidateReview';
 import {
   candidateResults,
@@ -77,6 +78,7 @@ export function FinalApprovalPage() {
 
   return (
     <>
+      <EvaluationNav />
       <PageHeader
         title="Result Review & Final Approval"
         description="Review evaluator marks, make necessary changes and approve final results."
