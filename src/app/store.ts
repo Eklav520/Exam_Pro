@@ -2,6 +2,7 @@ import { combineReducers, configureStore, createListenerMiddleware } from '@redu
 import { attemptReducer, registerAttemptListeners } from '@/features/attempt';
 import { authReducer, registerAuthListeners } from '@/features/auth';
 import { candidateReducer, registerCandidateListeners } from '@/features/candidate';
+import { papersReducer, registerPaperListeners } from '@/features/question-papers';
 import { baseApi } from '@/shared/api/baseApi';
 import type { AppStartListening } from './hooks';
 
@@ -10,6 +11,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   attempt: attemptReducer,
   candidate: candidateReducer,
+  papers: papersReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
@@ -29,6 +31,7 @@ export function makeStore(preloadedState?: Partial<RootState>) {
   registerAuthListeners(startListening);
   registerAttemptListeners(startListening);
   registerCandidateListeners(startListening);
+  registerPaperListeners(startListening);
 
   return store;
 }

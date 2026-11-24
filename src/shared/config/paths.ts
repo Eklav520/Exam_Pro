@@ -21,6 +21,8 @@ export const path = {
   adminExamNew: '/admin/exams/new',
   adminExamEdit: '/admin/exams/:examId/edit',
   adminQuestionPapers: '/admin/question-papers',
+  adminPaperNew: '/admin/question-papers/new',
+  adminPaperEdit: '/admin/question-papers/:paperId/edit',
   adminApprovals: '/admin/approvals',
   adminMonitoring: '/admin/monitoring',
   adminEvaluation: '/admin/evaluation',
@@ -38,5 +40,6 @@ export const to = {
   attempt: (attemptId: string) => `/attempts/${attemptId}`,
   resultDetail: (attemptId: string) => `/results/${attemptId}`,
   candidateTask: (taskId: string) => `/exam/section-b/${taskId}`,
+  adminPaperEdit: (paperId: string) => `/admin/question-papers/${paperId}/edit`,
   adminExamEdit: (examId: string) => `/admin/exams/${examId}/edit`,
 } as const;

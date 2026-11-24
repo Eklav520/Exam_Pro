@@ -6,8 +6,8 @@ interface StaffRoleConfig {
   initials: string;
   /** Screen shown after signing in. */
   home: string;
-  /** Where the "Evaluation" menu item leads. */
-  evaluation: string;
+  /** Where the "Evaluation" menu item leads; null hides it. */
+  evaluation: string | null;
 }
 
 export const staffRoles: Record<StaffRole, StaffRoleConfig> = {
@@ -16,6 +16,12 @@ export const staffRoles: Record<StaffRole, StaffRoleConfig> = {
     initials: 'AD',
     home: path.adminDashboard,
     evaluation: path.adminAllocation,
+  },
+  question_paper_setter: {
+    label: 'Question Paper Setter',
+    initials: 'QP',
+    home: path.adminQuestionPapers,
+    evaluation: null,
   },
   higher_official: {
     label: 'Higher Official',

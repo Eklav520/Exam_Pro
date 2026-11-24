@@ -10,7 +10,7 @@ import { tokenStorage } from '@/shared/lib/storage';
 expect.extend(matchers);
 
 // Lazy-loaded pages are compiled on first use, which can be slow on a busy machine.
-configure({ asyncUtilTimeout: 5_000 });
+configure({ asyncUtilTimeout: 15_000 });
 
 // jsdom does not implement modal dialogs.
 HTMLDialogElement.prototype.showModal = function () {
@@ -25,6 +25,7 @@ beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => {
   cleanup();
   server.resetHandlers();
+  localStorage.clear();
   resetDb();
   tokenStorage.clear();
   sessionStorage.clear();

@@ -12,6 +12,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
+import { useStaffRole } from '@/features/staff';
 import { path } from '@/shared/config/paths';
 import { Brand } from '@/shared/ui';
 
@@ -35,6 +36,9 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onNavigate }: SidebarProps) {
+  const { evaluation } = useStaffRole();
+  const visible = items.filter((item) => item.to !== path.adminEvaluation || evaluation !== null);
+
   return (
     <aside
       id="admin-sidebar"
@@ -50,7 +54,7 @@ export function Sidebar({ isOpen, onNavigate }: SidebarProps) {
         </Link>
       </div>
       <nav aria-label="Main" className="space-y-1 px-3 pb-6">
-        {items.map(({ to, label, icon: Icon }) => (
+        {visible.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}

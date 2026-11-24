@@ -18,6 +18,7 @@ const staff = (id: string, label: string, name: string, staffRole: StaffRole): D
 
 export const dummyAccounts: DummyAccount[] = [
   staff('u-admin', 'Admin', 'Alex Dsouza', 'admin'),
+  staff('u-setter', 'Question Paper Setter', 'Priya Sharma', 'question_paper_setter'),
   staff('u-official', 'Higher Official', 'Hari Om', 'higher_official'),
   staff('u-evaluator', 'Evaluator', 'R. Kumar', 'evaluator'),
   {

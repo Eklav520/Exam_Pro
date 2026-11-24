@@ -15,12 +15,13 @@ npm run dev        # http://localhost:3000
 
 This uses dummy accounts and an in-browser mock API, so no backend is needed. The login page signs in to each account with one click, or use the password `demo123`:
 
-| Role            | Email                    | Opens on                |
-| --------------- | ------------------------ | ----------------------- |
-| Admin           | `admin@exampro.test`     | Dashboard               |
-| Higher Official | `official@exampro.test`  | Question Paper Approval |
-| Evaluator       | `evaluator@exampro.test` | Evaluation Workspace    |
-| Student         | `student@exampro.test`   | Secure Exam Launch      |
+| Role                  | Email                    | Opens on                |
+| --------------------- | ------------------------ | ----------------------- |
+| Admin                 | `admin@exampro.test`     | Dashboard               |
+| Question Paper Setter | `setter@exampro.test`    | Question Papers         |
+| Higher Official       | `official@exampro.test`  | Question Paper Approval |
+| Evaluator             | `evaluator@exampro.test` | Evaluation Workspace    |
+| Student               | `student@exampro.test`   | Secure Exam Launch      |
 
 Mock data is kept in `localStorage`; remove the `exam-pro.mock-db` key to reset it. Dummy accounts and mocks are never part of a production build.
 
@@ -64,7 +65,7 @@ src/
     candidate/    Student exam screens: launch, sections, MCQ, practical tasks, submitted.
                   Sample data, saved in the browser tab; not connected yet.
     staff/        Admin-side roles and account menu
-    admin-dashboard/, question-papers/, approvals/, monitoring/, evaluation/
+    admin-dashboard/, question-papers/, approvals/, monitoring/, evaluation/, users/
                   Admin screens. Designed, using data/sample.ts; not connected yet.
   shared/     Reusable, business-agnostic: api, config, hooks, lib, types, ui
   mocks/      Mock API (MSW): handlers, seed data, grading
@@ -86,6 +87,8 @@ Screens are built from sample data first and connected later.
 - Each feature's `data/sample.ts` is what an API will replace.
 - `usePreviewAction()` marks every control that still needs functionality.
 - Staff roles decide the opening screen and the Evaluation screen. They do not restrict access yet.
+
+Question papers and their approval work end to end, but are kept in this browser (`localStorage`, key `exam-pro.papers.v1`) until they are connected.
 
 ### State
 

@@ -55,6 +55,19 @@ export const adminRoutes: RouteObject[] = [
         }),
       },
       {
+        path: path.adminPaperNew,
+        lazy: async () => ({
+          Component: (await import('@/features/question-papers/pages/CreatePaperPage'))
+            .CreatePaperPage,
+        }),
+      },
+      {
+        path: path.adminPaperEdit,
+        lazy: async () => ({
+          Component: (await import('@/features/question-papers/pages/EditPaperPage')).EditPaperPage,
+        }),
+      },
+      {
         path: path.adminApprovals,
         lazy: async () => ({
           Component: (await import('@/features/approvals/pages/ApprovalsPage')).ApprovalsPage,
@@ -80,7 +93,12 @@ export const adminRoutes: RouteObject[] = [
         }),
       },
       { path: path.adminResults, element: <ComingSoonPage title="Results" /> },
-      { path: path.adminUsers, element: <ComingSoonPage title="Users & Roles" /> },
+      {
+        path: path.adminUsers,
+        lazy: async () => ({
+          Component: (await import('@/features/users/pages/UsersPage')).UsersPage,
+        }),
+      },
       { path: path.adminReports, element: <ComingSoonPage title="Reports" /> },
       { path: path.adminSettings, element: <ComingSoonPage title="Settings" /> },
     ],

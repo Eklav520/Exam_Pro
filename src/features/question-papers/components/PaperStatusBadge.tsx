@@ -1,5 +1,5 @@
 import { Badge } from '@/shared/ui';
-import type { PaperStatus } from '../data/sample';
+import type { PaperStatus } from '../model/paper';
 
 const config = {
   draft: { label: 'Draft', tone: 'neutral' },

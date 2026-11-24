@@ -15,6 +15,8 @@ interface DataTableProps<Row> {
   rows: Row[];
   getRowKey: (row: Row) => string;
   emptyMessage?: string;
+  /** Less space between columns, for wide tables. */
+  dense?: boolean;
 }
 
 export function DataTable<Row>({
@@ -23,6 +25,7 @@ export function DataTable<Row>({
   rows,
   getRowKey,
   emptyMessage = 'Nothing matches these filters.',
+  dense = false,
 }: DataTableProps<Row>) {
   return (
     <div className="relative overflow-x-auto rounded-xl border border-line bg-surface">
@@ -35,7 +38,8 @@ export function DataTable<Row>({
                 key={column.header}
                 scope="col"
                 className={clsx(
-                  'px-4 py-3 font-semibold whitespace-nowrap text-ink',
+                  dense ? 'px-2.5' : 'px-4',
+                  'py-3 font-semibold whitespace-nowrap text-ink',
                   alignment[column.align ?? 'left'],
                 )}
               >
@@ -51,7 +55,8 @@ export function DataTable<Row>({
                 <td
                   key={column.header}
                   className={clsx(
-                    'px-4 py-2.5 whitespace-nowrap',
+                    dense ? 'px-2.5' : 'px-4',
+                    'py-2.5 whitespace-nowrap',
                     alignment[column.align ?? 'left'],
                   )}
                 >

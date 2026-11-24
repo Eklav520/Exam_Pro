@@ -4,6 +4,7 @@ import { DUMMY_PASSWORD, dummyAccounts } from './data/dummyAccounts';
 
 const homes: Record<string, string> = {
   Admin: 'Welcome, Admin',
+  'Question Paper Setter': 'Question Papers',
   'Higher Official': 'Question Paper Approval',
   Evaluator: 'Evaluate Answer Paper',
   Student: 'Secure Exam Launch',
