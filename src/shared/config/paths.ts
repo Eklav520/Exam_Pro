@@ -9,6 +9,12 @@ export const path = {
   results: '/results',
   resultDetail: '/results/:attemptId',
 
+  candidateLaunch: '/exam',
+  candidateHome: '/exam/sections',
+  candidateMcq: '/exam/section-a',
+  candidateTask: '/exam/section-b/:taskId',
+  candidateSubmitted: '/exam/submitted',
+
   admin: '/admin',
   adminDashboard: '/admin/dashboard',
   adminExams: '/admin/exams',
@@ -31,5 +37,6 @@ export const to = {
   examDetail: (examId: string) => `/exams/${examId}`,
   attempt: (attemptId: string) => `/attempts/${attemptId}`,
   resultDetail: (attemptId: string) => `/results/${attemptId}`,
+  candidateTask: (taskId: string) => `/exam/section-b/${taskId}`,
   adminExamEdit: (examId: string) => `/admin/exams/${examId}/edit`,
 } as const;

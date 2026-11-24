@@ -1,15 +1,10 @@
 import clsx from 'clsx';
 import { GraduationCap } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { path } from '@/shared/config/paths';
 
-/** `compact` drops the tagline on phones, where it does not fit in the top bar. */
+/** `compact` drops the tagline on phones, for places such as the top bar. */
 export function Brand({ compact = false }: { compact?: boolean }) {
   return (
-    <Link
-      to={path.admin}
-      className={clsx('flex gap-3 rounded-lg', compact ? 'items-center' : 'items-start')}
-    >
+    <span className={clsx('flex gap-3', compact ? 'items-center' : 'items-start')}>
       <GraduationCap
         aria-hidden
         className="size-10 shrink-0 fill-sky-400 text-sky-500"
@@ -23,6 +18,6 @@ export function Brand({ compact = false }: { compact?: boolean }) {
           Examination Management &amp; Evaluation System
         </span>
       </span>
-    </Link>
+    </span>
   );
 }

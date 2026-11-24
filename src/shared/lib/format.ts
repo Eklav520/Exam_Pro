@@ -14,6 +14,12 @@ export function formatCountdown(ms: number): string {
   return hours > 0 ? `${pad(hours)}:${clock}` : clock;
 }
 
+/** Always with hours: 61000 -> "00:01:01" */
+export function formatClock(ms: number): string {
+  const clock = formatCountdown(ms);
+  return clock.length > 5 ? clock : `00:${clock}`;
+}
+
 const dateTime = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
 export function formatDateTime(iso: string): string {

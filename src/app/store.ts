@@ -1,7 +1,7 @@
 import { combineReducers, configureStore, createListenerMiddleware } from '@reduxjs/toolkit';
 import { attemptReducer, registerAttemptListeners } from '@/features/attempt';
 import { authReducer, registerAuthListeners } from '@/features/auth';
-import { staffReducer } from '@/features/staff';
+import { candidateReducer, registerCandidateListeners } from '@/features/candidate';
 import { baseApi } from '@/shared/api/baseApi';
 import type { AppStartListening } from './hooks';
 
@@ -9,7 +9,7 @@ const rootReducer = combineReducers({
   [baseApi.reducerPath]: baseApi.reducer,
   auth: authReducer,
   attempt: attemptReducer,
-  staff: staffReducer,
+  candidate: candidateReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
@@ -28,6 +28,7 @@ export function makeStore(preloadedState?: Partial<RootState>) {
   const startListening = listener.startListening as AppStartListening;
   registerAuthListeners(startListening);
   registerAttemptListeners(startListening);
+  registerCandidateListeners(startListening);
 
   return store;
 }

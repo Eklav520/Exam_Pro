@@ -11,9 +11,9 @@ import {
   SquarePen,
   Users,
 } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { path } from '@/shared/config/paths';
-import { Brand } from './Brand';
+import { Brand } from '@/shared/ui';
 
 const items = [
   { to: path.adminDashboard, label: 'Dashboard', icon: House },
@@ -45,7 +45,9 @@ export function Sidebar({ isOpen, onNavigate }: SidebarProps) {
       )}
     >
       <div className="px-5 pt-6 pb-5">
-        <Brand />
+        <Link to={path.admin} onClick={onNavigate} className="block rounded-lg">
+          <Brand />
+        </Link>
       </div>
       <nav aria-label="Main" className="space-y-1 px-3 pb-6">
         {items.map(({ to, label, icon: Icon }) => (

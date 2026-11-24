@@ -4,6 +4,7 @@ import { path } from '@/shared/config/paths';
 import { PageLoader } from '@/shared/ui';
 import { AppLayout } from '../layouts/AppLayout';
 import { adminRoutes } from './adminRoutes';
+import { candidateRoutes } from './candidateRoutes';
 import { NotFoundPage } from './NotFoundPage';
 import { RouteError } from './RouteError';
 
@@ -26,6 +27,7 @@ export const routes: RouteObject[] = [
           {
             element: <RequireRole role="student" />,
             children: [
+              ...candidateRoutes,
               {
                 // Full screen: no navigation while an exam is running.
                 path: path.attempt,

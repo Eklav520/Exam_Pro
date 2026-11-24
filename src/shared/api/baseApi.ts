@@ -29,7 +29,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   // Only end the session the failed request belonged to: not a bad login, nor a
   // late 401 from a previous user after someone else has signed in.
   if (result.error?.status === 401 && token && token === getToken(api.getState)) {
-    api.dispatch(sessionEnded());
+    api.dispatch(sessionEnded('expired'));
   }
   return result;
 };

@@ -19,7 +19,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div
         role="status"
-        className="pointer-events-none fixed inset-x-4 bottom-6 z-50 flex justify-center"
+        className="pointer-events-none fixed inset-x-4 bottom-24 z-50 flex justify-center"
       >
         {toast && (
           <p className="rounded-lg bg-navy-900 px-4 py-3 text-sm text-white shadow-lg">

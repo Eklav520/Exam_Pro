@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { path } from '@/shared/config/paths';
 import { renderApp } from '@/test/renderApp';
 
-const open = (route: string) => renderApp({ route, as: 'u-admin' });
+const open = (route: string) => renderApp({ route, as: 'u-mainadmin' });
 
 describe('admin screens', () => {
   it.each([
@@ -20,25 +20,13 @@ describe('admin screens', () => {
     expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
   });
 
-  it('opens each role on its own screen, including for Evaluation', async () => {
-    const { user, router } = open('/');
-    const choose = async (current: string, next: string) => {
-      await user.click(await screen.findByRole('button', { name: `Account menu, ${current}` }));
-      await user.click(screen.getByRole('button', { name: next }));
-    };
-    await screen.findByRole('heading', { name: 'Welcome, Main Admin' });
-
-    await choose('Main Admin', 'Higher Official');
-    await screen.findByRole('heading', { name: 'Question Paper Approval' });
-
-    await choose('Higher Official', 'Admin');
-    await screen.findByRole('heading', { name: 'Question Papers' });
-    await user.click(screen.getByRole('link', { name: 'Evaluation' }));
-    await screen.findByRole('heading', { name: 'Allocate Answer Papers' });
-
-    await choose('Admin', 'Evaluator');
-    await screen.findByRole('heading', { name: 'Evaluate Answer Paper' });
-    expect(router.state.location.pathname).toBe(path.adminWorkspace);
+  it.each([
+    ['u-mainadmin', 'Result Review & Final Approval'],
+    ['u-admin', 'Allocate Answer Papers'],
+    ['u-evaluator', 'Evaluate Answer Paper'],
+  ] as const)('Evaluation leads %s to its own screen', async (as, heading) => {
+    renderApp({ route: path.adminEvaluation, as });
+    expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
   });
 
   it('filters paper sets', async () => {

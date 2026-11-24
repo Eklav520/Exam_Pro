@@ -1,5 +1,6 @@
 export { Alert } from './Alert';
 export { Badge } from './Badge';
+export { Brand } from './Brand';
 export { Button } from './Button';
 export { buttonClass } from './buttonClass';
 export { Card } from './Card';
@@ -9,6 +10,7 @@ export { Dropdown } from './Dropdown';
 export { Field } from './Field';
 export { FilterBar } from './FilterBar';
 export { IconButton } from './IconButton';
+export { Modal } from './Modal';
 export { PageHeader } from './PageHeader';
 export { EmptyState, PageError, PageLoader } from './PageState';
 export { ProgressBar } from './ProgressBar';

@@ -12,7 +12,7 @@ async function signIn(user: ReturnType<typeof renderApp>['user'], email: string,
 describe('authentication', () => {
   it('returns to the requested page after signing in', async () => {
     const { user, router } = renderApp({ route: '/results' });
-    await signIn(user, 'student@exampro.test', 'student123');
+    await signIn(user, 'student@exampro.test', 'demo123');
     expect(await screen.findByRole('heading', { name: 'Results' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/results');
   });
@@ -25,11 +25,11 @@ describe('authentication', () => {
 
   it('keeps students out of admin pages', async () => {
     renderApp({ route: '/admin/exams', as: 'u-student' });
-    expect(await screen.findByRole('heading', { name: 'Welcome, Sam' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Secure Exam Launch' })).toBeInTheDocument();
   });
 
   it('logs out and drops cached data', async () => {
-    const { user, store } = renderApp({ as: 'u-student' });
+    const { user, store } = renderApp({ route: '/dashboard', as: 'u-student' });
     await user.click(await screen.findByRole('button', { name: 'Log out' }));
     expect(await screen.findByRole('button', { name: 'Sign in' })).toBeInTheDocument();
     expect(store.getState().auth.token).toBeNull();
@@ -37,7 +37,7 @@ describe('authentication', () => {
   });
 
   it('ends the session when the API rejects the token', async () => {
-    const { store } = renderApp({ as: 'u-student' });
+    const { store } = renderApp({ route: '/dashboard', as: 'u-student' });
     await screen.findByRole('heading', { name: 'Welcome, Sam' });
     server.use(
       http.get('*/results', () => HttpResponse.json({ message: 'Expired' }, { status: 401 })),

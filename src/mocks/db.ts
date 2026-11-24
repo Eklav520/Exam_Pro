@@ -28,7 +28,8 @@ const createSeed = (): Database =>
 function load(): Database {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? (JSON.parse(saved) as Database) : createSeed();
+    // Accounts always come from the code, so adding one needs no data reset.
+    return saved ? { ...(JSON.parse(saved) as Database), users: seedUsers } : createSeed();
   } catch {
     return createSeed();
   }

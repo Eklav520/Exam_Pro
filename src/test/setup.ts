@@ -27,5 +27,6 @@ afterEach(() => {
   server.resetHandlers();
   resetDb();
   tokenStorage.clear();
+  sessionStorage.clear();
 });
 afterAll(() => server.close());

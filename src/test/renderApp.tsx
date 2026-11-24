@@ -8,12 +8,12 @@ import { makeStore } from '@/app/store';
 interface RenderAppOptions {
   route?: string;
   /** Mock user to sign in as. */
-  as?: 'u-student' | 'u-admin';
+  as?: 'u-student' | 'u-mainadmin' | 'u-admin' | 'u-official' | 'u-evaluator';
 }
 
 /** Renders the whole app against the mock API. */
 export function renderApp({ route = '/', as }: RenderAppOptions = {}) {
-  const store = makeStore(as ? { auth: { token: `mock-${as}` } } : undefined);
+  const store = makeStore(as ? { auth: { token: `mock-${as}`, hasLoggedOut: false } } : undefined);
   const router = createMemoryRouter(routes, { initialEntries: [route] });
   render(
     <Provider store={store}>

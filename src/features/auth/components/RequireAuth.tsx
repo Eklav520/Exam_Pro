@@ -3,15 +3,18 @@ import { useAppSelector } from '@/app/hooks';
 import { path } from '@/shared/config/paths';
 import { PageError, PageLoader } from '@/shared/ui';
 import { useGetMeQuery } from '../api/authApi';
-import { selectIsAuthenticated } from '../model/authSlice';
+import { selectHasLoggedOut, selectIsAuthenticated } from '../model/authSlice';
 
 export function RequireAuth() {
   const location = useLocation();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const hasLoggedOut = useAppSelector(selectHasLoggedOut);
   const { data: user, error, refetch } = useGetMeQuery(undefined, { skip: !isAuthenticated });
 
   if (!isAuthenticated) {
-    return <Navigate to={path.login} replace state={{ from: location.pathname }} />;
+    return (
+      <Navigate to={path.login} replace state={hasLoggedOut ? null : { from: location.pathname }} />
+    );
   }
   if (user) return <Outlet />;
   if (error) {

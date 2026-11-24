@@ -1,10 +1,10 @@
 import clsx from 'clsx';
 import { Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Outlet, ScrollRestoration } from 'react-router-dom';
-import { RoleMenu } from '@/features/staff';
-import { IconButton, ToastProvider } from '@/shared/ui';
-import { Brand } from './Brand';
+import { Link, Outlet, ScrollRestoration } from 'react-router-dom';
+import { AccountMenu } from '@/features/staff';
+import { path } from '@/shared/config/paths';
+import { Brand, IconButton, ToastProvider } from '@/shared/ui';
 import { Notifications } from './Notifications';
 import { Sidebar } from './Sidebar';
 
@@ -52,12 +52,14 @@ export function AdminLayout({ hasSidebar = true }: AdminLayoutProps) {
                 onClick={() => setIsMenuOpen(true)}
               />
             ) : (
-              <Brand compact />
+              <Link to={path.admin} className="rounded-lg">
+                <Brand compact />
+              </Link>
             )}
             <div className="ml-auto flex items-center gap-3">
               <Notifications />
               <span aria-hidden className="h-6 w-px bg-line" />
-              <RoleMenu />
+              <AccountMenu />
             </div>
           </header>
           <main className="px-4 py-6 lg:px-8">

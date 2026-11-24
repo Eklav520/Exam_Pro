@@ -1,11 +1,10 @@
 import { path } from '@/shared/config/paths';
-
-export type StaffRole = 'main_admin' | 'admin' | 'higher_official' | 'evaluator';
+import type { StaffRole } from '@/shared/types';
 
 interface StaffRoleConfig {
   label: string;
   initials: string;
-  /** Screen shown after choosing the role. */
+  /** Screen shown after signing in. */
   home: string;
   /** Where the "Evaluation" menu item leads. */
   evaluation: string;

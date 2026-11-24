@@ -7,12 +7,15 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Read by screen readers and shown as a tooltip. */
   label: string;
   danger?: boolean;
+  /** For dark backgrounds. */
+  inverse?: boolean;
 }
 
 export function IconButton({
   icon: Icon,
   label,
   danger = false,
+  inverse = false,
   className,
   ...rest
 }: IconButtonProps) {
@@ -23,7 +26,9 @@ export function IconButton({
       title={label}
       className={clsx(
         'inline-flex size-8 items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-40',
-        danger ? 'text-danger hover:bg-danger-soft' : 'text-navy-800 hover:bg-canvas',
+        danger && 'text-danger hover:bg-danger-soft',
+        inverse && 'text-white hover:bg-white/15',
+        !danger && !inverse && 'text-navy-800 hover:bg-canvas',
         className,
       )}
       {...rest}

@@ -1,8 +1,8 @@
-import { useAppSelector } from '@/app/hooks';
+import { useCurrentUser } from '@/features/auth';
 import { staffRoles } from './model/staffRoles';
-import { selectStaffRole } from './model/staffSlice';
 
 export function useStaffRole() {
-  const id = useAppSelector(selectStaffRole);
+  // The backend has a single "admin" role for now; treat it as the Main Admin.
+  const id = useCurrentUser()?.staffRole ?? 'main_admin';
   return { id, ...staffRoles[id] };
 }

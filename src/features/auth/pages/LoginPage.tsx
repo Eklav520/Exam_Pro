@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { lazy, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { Navigate, useLocation } from 'react-router-dom';
 import { z } from 'zod';
@@ -7,21 +8,22 @@ import { getErrorMessage } from '@/shared/api/getErrorMessage';
 import { env } from '@/shared/config/env';
 import { path } from '@/shared/config/paths';
 import { useDocumentTitle } from '@/shared/hooks/useDocumentTitle';
-import { Alert, Button, Card, Field } from '@/shared/ui';
-import { useLoginMutation } from '../api/authApi';
+import { Alert, Brand, Button, Field } from '@/shared/ui';
+import { useLoginMutation, type LoginRequest } from '../api/authApi';
 import { selectIsAuthenticated } from '../model/authSlice';
+
+// `DEV` is statically false in production builds, so dummy accounts are never bundled there.
+const DummyAccounts =
+  import.meta.env.DEV && env.enableMocks
+    ? lazy(async () => ({
+        default: (await import('../components/DummyAccounts')).DummyAccounts,
+      }))
+    : null;
 
 const loginSchema = z.object({
   email: z.email('Enter a valid email address'),
   password: z.string().min(1, 'Enter your password'),
 });
-
-type LoginForm = z.infer<typeof loginSchema>;
-
-const demoAccounts = [
-  { label: 'Student demo', email: 'student@exampro.test', password: 'student123' },
-  { label: 'Admin demo', email: 'admin@exampro.test', password: 'admin123' },
-];
 
 function getRedirect(state: unknown): string {
   if (typeof state === 'object' && state !== null && 'from' in state) {
@@ -38,9 +40,9 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
-    setValue,
+    reset,
     formState: { errors },
-  } = useForm<LoginForm>({
+  } = useForm<LoginRequest>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
@@ -48,11 +50,17 @@ export function LoginPage() {
   if (isAuthenticated) return <Navigate to={getRedirect(location.state)} replace />;
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-4 py-12">
-      <img src="/favicon.svg" alt="" className="mb-4 size-10" />
-      <h1 className="text-2xl font-semibold tracking-tight">Sign in to Exam Pro</h1>
-      <p className="mt-1 mb-6 text-muted">Take your exams and review your results.</p>
-      <Card>
+    <div className="grid min-h-dvh grid-rows-[auto_1fr] bg-surface lg:grid-cols-[2fr_3fr] lg:grid-rows-1">
+      <header className="flex flex-col justify-between gap-12 bg-linear-to-b from-navy-800 to-navy-900 px-6 py-6 text-white lg:px-12 lg:py-10">
+        <Brand />
+        <p className="hidden max-w-md text-3xl leading-snug font-semibold lg:block">
+          Prepare, conduct, evaluate and approve examinations in one place.
+        </p>
+        <span aria-hidden className="hidden lg:block" />
+      </header>
+      <main className="mx-auto flex w-full max-w-md flex-col justify-center px-6 py-10">
+        <h1 className="text-2xl font-bold tracking-tight">Sign in</h1>
+        <p className="mt-1 mb-6 text-muted">Use your ExamPro account to continue.</p>
         <form
           noValidate
           className="space-y-4"
@@ -78,25 +86,18 @@ export function LoginPage() {
             Sign in
           </Button>
         </form>
-      </Card>
-      {import.meta.env.DEV && env.enableMocks && (
-        <div className="mt-4 flex gap-2">
-          {demoAccounts.map((account) => (
-            <Button
-              key={account.email}
-              variant="secondary"
-              size="sm"
-              className="flex-1"
-              onClick={() => {
-                setValue('email', account.email, { shouldValidate: true });
-                setValue('password', account.password, { shouldValidate: true });
+        {DummyAccounts && (
+          <Suspense>
+            <DummyAccounts
+              disabled={isLoading}
+              onSelect={(credentials) => {
+                reset(credentials);
+                void login(credentials);
               }}
-            >
-              {account.label}
-            </Button>
-          ))}
-        </div>
-      )}
-    </main>
+            />
+          </Suspense>
+        )}
+      </main>
+    </div>
   );
 }

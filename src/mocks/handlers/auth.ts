@@ -14,7 +14,7 @@ export const authHandlers = [
   }),
 
   http.get(url('/auth/me'), ({ request }) => {
-    const { id, name, email, role } = requireUser(request);
-    return HttpResponse.json({ id, name, email, role });
+    const { id, name, email, role, staffRole } = requireUser(request);
+    return HttpResponse.json({ id, name, email, role, staffRole });
   }),
 ];

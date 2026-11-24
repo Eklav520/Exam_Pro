@@ -1,25 +1,14 @@
+import { DUMMY_PASSWORD, dummyAccounts } from '@/features/auth/data/dummyAccounts';
 import type { Exam, Question, User } from '@/shared/types';
 
 export interface MockUser extends User {
   password: string;
 }
 
-export const seedUsers: MockUser[] = [
-  {
-    id: 'u-student',
-    name: 'Sam Student',
-    email: 'student@exampro.test',
-    password: 'student123',
-    role: 'student',
-  },
-  {
-    id: 'u-admin',
-    name: 'Alex Admin',
-    email: 'admin@exampro.test',
-    password: 'admin123',
-    role: 'admin',
-  },
-];
+export const seedUsers: MockUser[] = dummyAccounts.map(({ label: _label, ...user }) => ({
+  ...user,
+  password: DUMMY_PASSWORD,
+}));
 
 function question(
   id: string,

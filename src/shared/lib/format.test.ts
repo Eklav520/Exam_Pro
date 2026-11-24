@@ -1,4 +1,4 @@
-import { formatCountdown, formatDuration } from './format';
+import { formatClock, formatCountdown, formatDuration } from './format';
 
 describe('format', () => {
   it('formats durations', () => {
@@ -11,5 +11,7 @@ describe('format', () => {
     expect(formatCountdown(61_000)).toBe('01:01');
     expect(formatCountdown(3_661_000)).toBe('01:01:01');
     expect(formatCountdown(-5)).toBe('00:00');
+    expect(formatClock(61_000)).toBe('00:01:01');
+    expect(formatClock(3_661_000)).toBe('01:01:01');
   });
 });

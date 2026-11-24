@@ -12,6 +12,6 @@ export function useCurrentUser() {
 export function useLogout() {
   const dispatch = useAppDispatch();
   return () => {
-    dispatch(sessionEnded());
+    dispatch(sessionEnded('logout'));
   };
 }

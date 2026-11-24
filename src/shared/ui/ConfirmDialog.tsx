@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { Button } from './Button';
+import { Modal } from './Modal';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -22,25 +23,14 @@ export function ConfirmDialog({
   onCancel,
   children,
 }: ConfirmDialogProps) {
-  const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
-
-  useEffect(() => {
-    const dialog = ref.current;
-    if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
-  }, [open]);
-
   return (
-    <dialog
-      ref={ref}
-      aria-labelledby={titleId}
-      onCancel={(event) => {
-        event.preventDefault();
+    <Modal
+      open={open}
+      titleId={titleId}
+      onClose={() => {
         if (!isLoading) onCancel();
       }}
-      className="m-auto w-full max-w-md rounded-lg bg-surface p-6 text-ink shadow-xl backdrop:bg-ink/40"
     >
       <h2 id={titleId} className="text-lg font-semibold">
         {title}
@@ -54,6 +44,6 @@ export function ConfirmDialog({
           {confirmLabel}
         </Button>
       </div>
-    </dialog>
+    </Modal>
   );
 }

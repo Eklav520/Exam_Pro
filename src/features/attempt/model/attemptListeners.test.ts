@@ -7,7 +7,7 @@ import { AUTOSAVE_DELAY_MS, AUTOSAVE_RETRY_MS } from './attemptListeners';
 import { attemptLoaded, optionToggled, selectSaveStatus } from './attemptSlice';
 
 async function setup() {
-  const store = makeStore({ auth: { token: 'mock-u-student' } });
+  const store = makeStore({ auth: { token: 'mock-u-student', hasLoggedOut: false } });
   const { startAttempt } = attemptApi.endpoints;
   const attempt = await store.dispatch(startAttempt.initiate('js-fundamentals')).unwrap();
   store.dispatch(attemptLoaded(attempt));
