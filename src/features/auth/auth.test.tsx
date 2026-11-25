@@ -25,7 +25,9 @@ describe('authentication', () => {
 
   it('keeps students out of admin pages', async () => {
     renderApp({ route: '/admin/exams', as: 'u-student' });
-    expect(await screen.findByRole('heading', { name: 'Secure Exam Launch' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Verify Your Examination Seat' }),
+    ).toBeInTheDocument();
   });
 
   it('logs out and drops cached data', async () => {

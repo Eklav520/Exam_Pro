@@ -7,7 +7,7 @@ const homes: Record<string, string> = {
   'Question Paper Setter': 'Question Papers',
   'Higher Official': 'Question Paper Approval',
   Evaluator: 'Evaluate Answer Paper',
-  Student: 'Secure Exam Launch',
+  Student: 'Verify Your Examination Seat',
 };
 
 type User = ReturnType<typeof renderApp>['user'];

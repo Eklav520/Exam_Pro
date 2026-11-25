@@ -21,14 +21,14 @@ describe('candidate examination', () => {
 
   it('starts from the launch screen with a running clock', async () => {
     const { user } = renderApp({ as: 'u-student' });
-    await user.click(await screen.findByRole('button', { name: 'Start Examination' }));
+    await user.click(await screen.findByRole('button', { name: 'Start Your Exam' }));
     expect(await screen.findByRole('heading', { name: 'Online Examination' })).toBeInTheDocument();
     expect(screen.getByRole('timer')).toHaveTextContent(/^02:(30:00|29:5\d)$/);
   });
 
   it('goes Home to the login page', async () => {
     const { user, router, store } = renderApp({ as: 'u-student' });
-    await user.click(await screen.findByRole('button', { name: 'Home' }));
+    await user.click(await screen.findByRole('button', { name: 'Exit to login' }));
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(path.login);
     expect(store.getState().auth.token).toBeNull();
@@ -36,7 +36,9 @@ describe('candidate examination', () => {
 
   it('does not show questions before starting', async () => {
     renderApp({ route: path.candidateMcq, as: 'u-student' });
-    expect(await screen.findByRole('heading', { name: 'Secure Exam Launch' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Verify Your Examination Seat' }),
+    ).toBeInTheDocument();
   });
 
   it('answers, marks and counts questions', async () => {
@@ -108,7 +110,9 @@ describe('candidate examination', () => {
     const { sessionEnded } = await import('@/shared/api/session');
     store.dispatch(sessionEnded('logout'));
     renderApp({ route: to.candidateTask('word'), as: 'u-student' });
-    expect(await screen.findByRole('heading', { name: 'Secure Exam Launch' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Verify Your Examination Seat' }),
+    ).toBeInTheDocument();
   });
 
   it('adds and edits slides', async () => {

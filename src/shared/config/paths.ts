@@ -24,6 +24,7 @@ export const path = {
   adminPaperNew: '/admin/question-papers/new',
   adminPaperEdit: '/admin/question-papers/:paperId/edit',
   adminApprovals: '/admin/approvals',
+  adminCentres: '/admin/centres',
   adminMonitoring: '/admin/monitoring',
   adminEvaluation: '/admin/evaluation',
   adminAllocation: '/admin/evaluation/allocation',

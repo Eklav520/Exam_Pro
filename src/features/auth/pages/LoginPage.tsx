@@ -1,24 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { lazy, Suspense } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Navigate, useLocation } from 'react-router-dom';
 import { z } from 'zod';
 import { useAppSelector } from '@/app/hooks';
 import { getErrorMessage } from '@/shared/api/getErrorMessage';
-import { env } from '@/shared/config/env';
 import { path } from '@/shared/config/paths';
 import { useDocumentTitle } from '@/shared/hooks/useDocumentTitle';
-import { Alert, Brand, Button, Field } from '@/shared/ui';
+import { Alert, Brand, Button, Field, SelectField } from '@/shared/ui';
 import { useLoginMutation, type LoginRequest } from '../api/authApi';
+import { DUMMY_PASSWORD, dummyAccounts } from '../data/dummyAccounts';
 import { selectIsAuthenticated } from '../model/authSlice';
-
-// `DEV` is statically false in production builds, so dummy accounts are never bundled there.
-const DummyAccounts =
-  import.meta.env.DEV && env.enableMocks
-    ? lazy(async () => ({
-        default: (await import('../components/DummyAccounts')).DummyAccounts,
-      }))
-    : null;
 
 const loginSchema = z.object({
   email: z.email('Enter a valid email address'),
@@ -36,6 +28,7 @@ export function LoginPage() {
   useDocumentTitle('Sign in');
   const location = useLocation();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const [selectedRole, setSelectedRole] = useState('');
   const [login, { isLoading, error }] = useLoginMutation();
   const {
     register,
@@ -46,6 +39,16 @@ export function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
+
+  function handleRoleChange(roleId: string) {
+    setSelectedRole(roleId);
+    const account = dummyAccounts.find((item) => item.id === roleId);
+    if (account) {
+      reset({ email: account.email, password: DUMMY_PASSWORD });
+    } else {
+      reset({ email: '', password: '' });
+    }
+  }
 
   if (isAuthenticated) return <Navigate to={getRedirect(location.state)} replace />;
 
@@ -67,6 +70,15 @@ export function LoginPage() {
           onSubmit={handleSubmit((values) => void login(values))}
         >
           {error && <Alert>{getErrorMessage(error)}</Alert>}
+          <SelectField
+            label="Role"
+            value={selectedRole}
+            options={[
+              { value: '', label: 'Select a role (Demo / Quick Fill)' },
+              ...dummyAccounts.map(({ id, label }) => ({ value: id, label })),
+            ]}
+            onChange={handleRoleChange}
+          />
           <Field label="Email" error={errors.email?.message}>
             {(props) => (
               <input {...props} type="email" autoComplete="username" {...register('email')} />
@@ -86,17 +98,6 @@ export function LoginPage() {
             Sign in
           </Button>
         </form>
-        {DummyAccounts && (
-          <Suspense>
-            <DummyAccounts
-              disabled={isLoading}
-              onSelect={(credentials) => {
-                reset(credentials);
-                void login(credentials);
-              }}
-            />
-          </Suspense>
-        )}
       </main>
     </div>
   );
