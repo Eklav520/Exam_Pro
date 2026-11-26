@@ -1,35 +1,8 @@
 import clsx from 'clsx';
-import {
-  CalendarDays,
-  ChartColumn,
-  ClipboardCheck,
-  FileCheck2,
-  FileText,
-  House,
-  MonitorCheck,
-  Server,
-  Settings,
-  SquarePen,
-  Users,
-} from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import { useStaffRole } from '@/features/staff';
 import { path } from '@/shared/config/paths';
 import { Brand } from '@/shared/ui';
-
-const items = [
-  { to: path.adminDashboard, label: 'Dashboard', icon: House },
-  { to: path.adminExams, label: 'Examinations', icon: CalendarDays },
-  { to: path.adminQuestionPapers, label: 'Question Papers', icon: FileText },
-  { to: path.adminApprovals, label: 'Approvals', icon: ClipboardCheck },
-  { to: path.adminCentres, label: 'Exam Centres', icon: Server },
-  { to: path.adminMonitoring, label: 'Conduct & Monitoring', icon: MonitorCheck },
-  { to: path.adminEvaluation, label: 'Evaluation', icon: SquarePen },
-  { to: path.adminResults, label: 'Results', icon: FileCheck2 },
-  { to: path.adminUsers, label: 'Users & Roles', icon: Users },
-  { to: path.adminReports, label: 'Reports', icon: ChartColumn },
-  { to: path.adminSettings, label: 'Settings', icon: Settings },
-];
 
 interface SidebarProps {
   /** Only matters on small screens, where the sidebar is a drawer. */
@@ -38,8 +11,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onNavigate }: SidebarProps) {
-  const { evaluation } = useStaffRole();
-  const visible = items.filter((item) => item.to !== path.adminEvaluation || evaluation !== null);
+  const { nav } = useStaffRole();
 
   return (
     <aside
@@ -56,7 +28,7 @@ export function Sidebar({ isOpen, onNavigate }: SidebarProps) {
         </Link>
       </div>
       <nav aria-label="Main" className="space-y-1 px-3 pb-6">
-        {visible.map(({ to, label, icon: Icon }) => (
+        {nav.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}

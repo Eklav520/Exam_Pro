@@ -29,9 +29,12 @@ async function openWizard() {
 }
 
 describe('setting a paper', () => {
-  it('starts the setter on the paper list', async () => {
+  it('starts the setter on their own dashboard', async () => {
     const { user } = renderApp({ as: 'u-setter' });
-    await screen.findByRole('heading', { name: 'Question Papers' });
+    await screen.findByRole('heading', { name: 'Welcome, Priya Sharma' });
+    // Set 3 belongs to another setter.
+    expect(screen.getByText('Finish Set 1 and send it for approval')).toBeInTheDocument();
+    expect(screen.queryByText(/Set 3/)).not.toBeInTheDocument();
     await user.click(screen.getByRole('link', { name: 'Create Paper Set' }));
     expect(
       await screen.findByRole('heading', { name: 'Create Question Paper – Set 5' }),
@@ -55,7 +58,7 @@ describe('setting a paper', () => {
 
     expect(screen.getByText(/Section A – MCQ \(1 Questions, 1 Marks\)/)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Submit for Approval' }));
-    await screen.findByRole('heading', { name: 'Question Papers' });
+    await screen.findByRole('heading', { name: 'My Paper Sets' });
     const row = screen.getByRole('row', { name: /Set 5/ });
     expect(row).toHaveTextContent('Under Review');
     expect(screen.getByRole('button', { name: 'Edit Set 5' })).toBeDisabled();
@@ -80,7 +83,7 @@ describe('setting a paper', () => {
     await next(user);
     await addQuestion(user, 'Saved at once?');
     await user.click(screen.getByRole('link', { name: 'Dashboard' }));
-    await user.click(await screen.findByRole('link', { name: 'Question Papers' }));
+    await user.click(await screen.findByRole('link', { name: 'My Paper Sets' }));
     await user.click(await screen.findByRole('button', { name: 'Edit Set 5' }));
     await screen.findByRole('heading', { name: 'Edit Question Paper – Set 5' });
     await next(user);
@@ -140,6 +143,10 @@ describe('setting a paper', () => {
     await user.type(within(dialog).getByLabelText(/What needs to change/), 'Fix question 4');
     await user.click(within(dialog).getByRole('button', { name: 'Return' }));
     cleanup();
+    renderApp({ route: path.adminDashboard, as: 'u-setter' });
+    expect(await screen.findByText('Set 2 was returned for changes')).toBeInTheDocument();
+    expect(screen.getByText(/Remarks: Fix question 4/)).toBeInTheDocument();
+    cleanup();
     renderApp({ route: to.adminPaperEdit('set-2'), as: 'u-setter' });
     expect(await screen.findByRole('alert')).toHaveTextContent('Fix question 4');
   });
@@ -151,7 +158,7 @@ describe('setting a paper', () => {
 
   it('duplicates and deletes drafts', async () => {
     const { user } = renderApp({ route: path.adminQuestionPapers, as: 'u-setter' });
-    await user.click(await screen.findByRole('button', { name: 'Duplicate Set 3' }));
+    await user.click(await screen.findByRole('button', { name: 'Duplicate Set 2' }));
     expect(screen.getByRole('row', { name: /Set 5/ })).toHaveTextContent('Draft');
     await user.click(screen.getByRole('button', { name: 'Delete Set 5' }));
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }));

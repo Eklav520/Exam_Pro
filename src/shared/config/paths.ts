@@ -28,6 +28,7 @@ export const path = {
   adminMonitoring: '/admin/monitoring',
   adminEvaluation: '/admin/evaluation',
   adminAllocation: '/admin/evaluation/allocation',
+  adminAssignedPapers: '/admin/evaluation/assigned',
   adminWorkspace: '/admin/evaluation/workspace',
   adminFinalApproval: '/admin/evaluation/final-approval',
   adminResults: '/admin/results',

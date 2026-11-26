@@ -2,13 +2,9 @@ import { screen } from '@testing-library/react';
 import { renderApp } from '@/test/renderApp';
 import { DUMMY_PASSWORD, dummyAccounts } from './data/dummyAccounts';
 
-const homes: Record<string, string> = {
-  Admin: 'Welcome, Admin',
-  'Question Paper Setter': 'Question Papers',
-  'Higher Official': 'Question Paper Approval',
-  Evaluator: 'Evaluate Answer Paper',
-  Student: 'Verify Your Examination Seat',
-};
+// Staff open on a dashboard of their own work; students on their exam.
+const homeOf = ({ role, name }: (typeof dummyAccounts)[number]) =>
+  role === 'student' ? 'Verify Your Examination Seat' : `Welcome, ${name}`;
 
 type User = ReturnType<typeof renderApp>['user'];
 
@@ -19,13 +15,13 @@ async function signIn(user: User, email: string) {
 }
 
 describe('dummy accounts', () => {
-  it.each(dummyAccounts.map(({ label, email }) => [label, email] as const))(
+  it.each(dummyAccounts.map((account) => [account.label, account] as const))(
     '%s opens on its own screen',
-    async (label, email) => {
+    async (_label, account) => {
       const { user } = renderApp({ route: '/login' });
-      await signIn(user, email);
+      await signIn(user, account.email);
       expect(
-        await screen.findByRole('heading', { level: 1, name: homes[label] }),
+        await screen.findByRole('heading', { level: 1, name: homeOf(account) }),
       ).toBeInTheDocument();
     },
   );
@@ -35,8 +31,7 @@ describe('dummy accounts', () => {
     await user.click(await screen.findByRole('button', { name: 'Account menu, Admin' }));
     await user.click(screen.getByRole('button', { name: 'Log out' }));
     await signIn(user, 'official@exampro.test');
-    expect(
-      await screen.findByRole('heading', { name: 'Question Paper Approval' }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Welcome, Hari Om' })).toBeInTheDocument();
+    expect(screen.getByText('Higher Official Dashboard')).toBeInTheDocument();
   });
 });

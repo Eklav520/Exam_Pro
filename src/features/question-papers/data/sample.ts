@@ -1,5 +1,5 @@
 // Sample data matching the design. Replace with an API when connecting these screens.
-import type { McqItem, PaperSet, PaperStatus, PracticalItem } from '../model/paper';
+import type { McqItem, PaperSet, PaperSetter, PaperStatus, PracticalItem } from '../model/paper';
 
 export const SAMPLE_EXAM = 'MS Office Practical Exam';
 export const sampleExams = [SAMPLE_EXAM, 'Computer Fundamentals Exam'];
@@ -78,7 +78,16 @@ const tasks: PracticalItem[] = [
   },
 ];
 
-const set = (number: number, status: PaperStatus, day: number, time: string): PaperSet => ({
+const priya: PaperSetter = { id: 'u-setter', name: 'Priya Sharma' };
+const manoj: PaperSetter = { id: 'u-setter-2', name: 'Manoj Jain' };
+
+const set = (
+  number: number,
+  status: PaperStatus,
+  day: number,
+  time: string,
+  setter: PaperSetter,
+): PaperSet => ({
   id: `set-${number}`,
   name: `Set ${number}`,
   exam: SAMPLE_EXAM,
@@ -89,11 +98,12 @@ const set = (number: number, status: PaperStatus, day: number, time: string): Pa
   submittedOn: `${day} Mar 2026`,
   updatedAt: `${day} Mar 2026, ${time}`,
   remarks: '',
+  setter,
 });
 
 export const samplePapers: PaperSet[] = [
-  set(1, 'draft', 12, '10:24 AM'),
-  set(2, 'under_review', 12, '11:18 AM'),
-  set(3, 'approved', 11, '04:32 PM'),
-  set(4, 'draft', 10, '09:15 AM'),
+  set(1, 'draft', 12, '10:24 AM', priya),
+  set(2, 'under_review', 12, '11:18 AM', priya),
+  set(3, 'approved', 11, '04:32 PM', manoj),
+  set(4, 'draft', 10, '09:15 AM', priya),
 ];

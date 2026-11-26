@@ -15,7 +15,6 @@ import {
   usePreviewAction,
   type Column,
 } from '@/shared/ui';
-import { EvaluationNav } from '../components/EvaluationNav';
 import { evaluators, submissionStats, type EvaluatorLoad } from '../data/sample';
 
 const tabs = [
@@ -76,7 +75,6 @@ export function AllocationPage() {
 
   return (
     <>
-      <EvaluationNav />
       <PageHeader
         title="Allocate Answer Papers"
         description="Assign submitted answer papers to evaluators for correction."

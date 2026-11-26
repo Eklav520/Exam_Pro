@@ -14,7 +14,6 @@ import {
   usePreviewAction,
   type Column,
 } from '@/shared/ui';
-import { EvaluationNav } from '../components/EvaluationNav';
 import { CandidateReview } from '../components/CandidateReview';
 import {
   candidateResults,
@@ -78,10 +77,9 @@ export function FinalApprovalPage() {
 
   return (
     <>
-      <EvaluationNav />
       <PageHeader
         title="Result Review & Final Approval"
-        description="Review evaluator marks, make necessary changes and approve final results."
+        description="Review the marks sent by evaluators, make any corrections, then release the results to students."
       />
       <div className="mb-5 grid items-stretch gap-4 lg:grid-cols-[1.4fr_3fr]">
         <div className="rounded-xl border border-line p-4">
@@ -126,20 +124,20 @@ export function FinalApprovalPage() {
         </Button>
         <Button disabled={rows.length === 0} onClick={() => setIsConfirming(true)}>
           <Check aria-hidden className="size-4" />
-          Approve Final Results
+          Approve &amp; Release Results
         </Button>
       </div>
       <ConfirmDialog
         open={isConfirming}
-        title="Approve final results?"
-        confirmLabel="Approve"
+        title="Approve and release the results?"
+        confirmLabel="Release Results"
         onConfirm={() => {
           setIsConfirming(false);
-          preview('Approve Final Results');
+          preview('Release Results');
         }}
         onCancel={() => setIsConfirming(false)}
       >
-        Results for {exam} will be final.
+        Results for {exam} will be final and students will be able to see them.
       </ConfirmDialog>
     </>
   );

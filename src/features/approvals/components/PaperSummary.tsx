@@ -6,6 +6,7 @@ export function PaperSummary({ paper }: { paper: PaperSet }) {
   const facts = [
     ['Examination', paper.exam],
     ['Paper Title', paper.title],
+    ['Prepared By', paper.setter?.name ?? '–'],
     [
       'Section A – MCQ',
       `${paper.mcqs.length} ${paper.mcqs.length === 1 ? 'Question' : 'Questions'}, ${totals.mcqMarks} Marks`,

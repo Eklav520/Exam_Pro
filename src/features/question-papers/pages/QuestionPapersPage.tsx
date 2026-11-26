@@ -2,6 +2,7 @@ import { Copy, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { useCurrentUser } from '@/features/auth';
 import { path, to } from '@/shared/config/paths';
 import {
   Badge,
@@ -17,7 +18,13 @@ import {
 } from '@/shared/ui';
 import { PaperStatusBadge } from '../components/PaperStatusBadge';
 import { SAMPLE_EXAM, sampleExams } from '../data/sample';
-import { getPaperTotals, getPaperType, paperTypes, type PaperSet } from '../model/paper';
+import {
+  getPaperTotals,
+  getPaperType,
+  isOwnPaper,
+  paperTypes,
+  type PaperSet,
+} from '../model/paper';
 import { paperDeleted, paperDuplicated, selectPapers } from '../model/papersSlice';
 
 const ALL = 'all';
@@ -33,7 +40,8 @@ export function QuestionPapersPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const toast = useToast();
-  const papers = useAppSelector(selectPapers);
+  const userId = useCurrentUser()?.id ?? '';
+  const papers = useAppSelector(selectPapers).filter((paper) => isOwnPaper(paper, userId));
   const [exam, setExam] = useState(SAMPLE_EXAM);
   const [type, setType] = useState(ALL);
   const [status, setStatus] = useState(ALL);
@@ -99,8 +107,8 @@ export function QuestionPapersPage() {
   return (
     <>
       <PageHeader
-        title="Question Papers"
-        description="Create, manage and maintain multiple paper sets for each examination."
+        title="My Paper Sets"
+        description="Prepare paper sets in the exam pattern set by the Admin and send them to the Higher Official for approval."
         actions={
           <Link to={path.adminPaperNew} className={buttonClass()}>
             <Plus aria-hidden className="size-4" />

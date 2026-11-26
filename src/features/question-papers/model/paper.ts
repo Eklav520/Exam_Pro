@@ -18,6 +18,12 @@ export const practicalApps = [
 ] as const satisfies readonly PracticalApp[];
 export type PracticalItem = PracticalTask;
 
+/** The paper setter who prepares a set. */
+export interface PaperSetter {
+  id: string;
+  name: string;
+}
+
 export interface PaperSet {
   id: string;
   name: string;
@@ -31,7 +37,13 @@ export interface PaperSet {
   updatedAt: string;
   /** Why the last review returned it. */
   remarks: string;
+  /** Absent on sets saved before setters were tracked; every setter sees those. */
+  setter?: PaperSetter;
 }
+
+/** Each setter works on their own sets only. */
+export const isOwnPaper = (paper: PaperSet, setterId: string) =>
+  paper.setter === undefined || paper.setter.id === setterId;
 
 const sumMarks = (items: { marks: number }[]) => items.reduce((sum, item) => sum + item.marks, 0);
 
@@ -72,8 +84,9 @@ export function getNextSetName(papers: PaperSet[], exam: string): string {
   return `Set ${Math.max(0, ...numbers) + 1}`;
 }
 
-export function createPaper(exam: string, name: string): PaperSet {
+export function createPaper(exam: string, name: string, setter?: PaperSetter): PaperSet {
   return {
+    ...(setter && { setter }),
     id: nanoid(),
     name,
     exam,
