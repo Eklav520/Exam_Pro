@@ -1,7 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { sessionEnded } from '@/shared/api/session';
 import { tokenStorage } from '@/shared/lib/storage';
-import { authApi } from '../api/authApi';
 
 interface AuthState {
   token: string | null;
@@ -12,17 +11,18 @@ interface AuthState {
 const authSlice = createSlice({
   name: 'auth',
   initialState: (): AuthState => ({ token: tokenStorage.get(), hasLoggedOut: false }),
-  reducers: {},
+  reducers: {
+    /** After the password and the mobile OTP are both verified. */
+    signedIn(state, { payload }: PayloadAction<string>) {
+      state.token = payload;
+      state.hasLoggedOut = false;
+    },
+  },
   extraReducers: (builder) => {
-    builder
-      .addCase(sessionEnded, (state, { payload }) => {
-        state.token = null;
-        state.hasLoggedOut = payload === 'logout';
-      })
-      .addMatcher(authApi.endpoints.login.matchFulfilled, (state, { payload }) => {
-        state.token = payload.token;
-        state.hasLoggedOut = false;
-      });
+    builder.addCase(sessionEnded, (state, { payload }) => {
+      state.token = null;
+      state.hasLoggedOut = payload === 'logout';
+    });
   },
   selectors: {
     selectIsAuthenticated: (state) => state.token !== null,
@@ -31,4 +31,5 @@ const authSlice = createSlice({
 });
 
 export const authReducer = authSlice.reducer;
+export const { signedIn } = authSlice.actions;
 export const { selectIsAuthenticated, selectHasLoggedOut } = authSlice.selectors;

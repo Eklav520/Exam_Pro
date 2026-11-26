@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import { renderApp } from '@/test/renderApp';
-import { DUMMY_PASSWORD, dummyAccounts } from './data/dummyAccounts';
+import { DUMMY_OTP, DUMMY_PASSWORD, dummyAccounts } from './data/dummyAccounts';
 
 // Staff open on a dashboard of their own work; students on their exam.
 const homeOf = ({ role, name }: (typeof dummyAccounts)[number]) =>
@@ -11,7 +11,9 @@ type User = ReturnType<typeof renderApp>['user'];
 async function signIn(user: User, email: string) {
   await user.type(await screen.findByLabelText('Email'), email);
   await user.type(screen.getByLabelText('Password'), DUMMY_PASSWORD);
-  await user.click(screen.getByRole('button', { name: 'Sign in' }));
+  await user.click(screen.getByRole('button', { name: 'Continue' }));
+  await user.type(await screen.findByLabelText('OTP'), DUMMY_OTP);
+  await user.click(screen.getByRole('button', { name: 'Verify & Sign in' }));
 }
 
 describe('dummy accounts', () => {

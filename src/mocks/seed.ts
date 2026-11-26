@@ -5,10 +5,12 @@ export interface MockUser extends User {
   password: string;
 }
 
-export const seedUsers: MockUser[] = dummyAccounts.map(({ label: _label, ...user }) => ({
-  ...user,
-  password: DUMMY_PASSWORD,
-}));
+export const seedUsers: MockUser[] = dummyAccounts.map(
+  ({ label: _label, mobile: _mobile, ...user }) => ({
+    ...user,
+    password: DUMMY_PASSWORD,
+  }),
+);
 
 function question(
   id: string,
