@@ -61,7 +61,7 @@ describe('managing exams', () => {
 
   it('preserves question ids and answer key when editing', async () => {
     const before = structuredClone(db.exams[0]!);
-    const { user } = renderApp({ route: '/admin/exams/js-fundamentals/edit', as: 'u-admin' });
+    const { user } = renderApp({ route: '/admin/exams/group2-screening/edit', as: 'u-admin' });
     const title = await screen.findByLabelText('Title *');
     await user.clear(title);
     await user.type(title, 'Renamed exam');
@@ -72,12 +72,14 @@ describe('managing exams', () => {
   });
 
   it('edits a question in its dialog', async () => {
-    const { user } = renderApp({ route: '/admin/exams/js-fundamentals/edit', as: 'u-admin' });
+    const { user } = renderApp({ route: '/admin/exams/group2-screening/edit', as: 'u-admin' });
     await user.click(await screen.findByRole('button', { name: 'Next' }));
     await screen.findByRole('heading', { name: /Part A/ });
     await user.click(screen.getByRole('button', { name: 'Edit question 1' }));
     const dialog = within(screen.getByRole('dialog'));
-    expect(dialog.getByLabelText('Question *')).toHaveValue('What does typeof null return?');
+    expect(dialog.getByLabelText('Question *')).toHaveValue(
+      'Andhra State was formed on 1 October 1953 with which city as its capital?',
+    );
     await user.clear(dialog.getByLabelText('Marks *'));
     await user.type(dialog.getByLabelText('Marks *'), '3');
     await user.click(dialog.getByRole('button', { name: 'Save Question' }));
@@ -87,12 +89,20 @@ describe('managing exams', () => {
   it('filters and deletes exams', async () => {
     const { user } = renderApp({ route: '/admin/exams', as: 'u-admin' });
     await user.selectOptions(await screen.findByLabelText('Status'), 'Draft');
-    expect(screen.queryByText('JavaScript Fundamentals')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Delete SQL Basics' }));
+    expect(screen.queryByText('APPSC Group-II Services – Screening Test')).not.toBeInTheDocument();
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Delete APPSC Panchayat Secretary (Grade-V) – Screening Test',
+      }),
+    );
     await user.click(
       within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete exam' }),
     );
-    await waitFor(() => expect(screen.queryByText('SQL Basics')).not.toBeInTheDocument());
-    expect(db.exams.some((exam) => exam.id === 'sql-basics')).toBe(false);
+    await waitFor(() =>
+      expect(
+        screen.queryByText('APPSC Panchayat Secretary (Grade-V) – Screening Test'),
+      ).not.toBeInTheDocument(),
+    );
+    expect(db.exams.some((exam) => exam.id === 'panchayat-secretary')).toBe(false);
   });
 });

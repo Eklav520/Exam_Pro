@@ -1,7 +1,7 @@
 // Sample exam matching the design. Replace with an API when connecting these screens.
 export const candidate = {
   rollNo: 'EXM20260078',
-  exam: 'MS Office Practical Exam',
+  exam: 'APPSC Computer Proficiency Test',
   centre: 'Centre - A',
 };
 

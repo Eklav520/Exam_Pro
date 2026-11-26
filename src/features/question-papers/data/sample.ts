@@ -1,8 +1,8 @@
 // Sample data matching the design. Replace with an API when connecting these screens.
 import type { McqItem, PaperSet, PaperSetter, PaperStatus, PracticalItem } from '../model/paper';
 
-export const SAMPLE_EXAM = 'MS Office Practical Exam';
-export const sampleExams = [SAMPLE_EXAM, 'Computer Fundamentals Exam'];
+export const SAMPLE_EXAM = 'APPSC Computer Proficiency Test';
+export const sampleExams = [SAMPLE_EXAM, 'APPSC Group-II Services – Screening Test'];
 
 const MCQ_MARKS = 2;
 const TASK_MARKS = 20;
@@ -91,7 +91,7 @@ const set = (
   id: `set-${number}`,
   name: `Set ${number}`,
   exam: SAMPLE_EXAM,
-  title: `MS Office Practical – Set ${number}`,
+  title: `Computer Proficiency Test – Set ${number}`,
   status,
   mcqs,
   tasks,

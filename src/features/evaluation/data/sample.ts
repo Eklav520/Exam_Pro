@@ -38,7 +38,7 @@ export const evaluators: EvaluatorLoad[] = [
 ];
 
 export const answerPaper = {
-  exam: 'MS Office Practical Exam',
+  exam: 'APPSC Computer Proficiency Test',
   registrationNo: 'EXM20260001',
   paperSet: 'Set 3',
   mcq: { questions: 20, score: 40, total: 40 },

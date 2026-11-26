@@ -3,7 +3,7 @@ import { Dropdown } from '@/shared/ui';
 
 // Sample content until notifications are connected.
 const notifications = [
-  'Set 2 of MS Office Practical Exam is waiting for approval.',
+  'Set 2 of APPSC Computer Proficiency Test is waiting for approval.',
   '48 results are under review.',
 ];
 

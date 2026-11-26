@@ -23,7 +23,7 @@ export const recentWorkflow: {
   examTitle: string;
   steps: { label: string; state: StepState }[];
 } = {
-  examTitle: 'MS Office Practical Examination',
+  examTitle: 'APPSC Computer Proficiency Test',
   steps: [
     { label: 'Paper Set Created', state: 'done' },
     { label: 'Approved & Released', state: 'done' },

@@ -61,11 +61,7 @@ export function UserDialog({ user, validateEmail, onSubmit, onCancel }: UserDial
         <UserRoundPlus aria-hidden className="size-6 text-brand-700" />
         {user ? 'Edit User' : 'Add New User'}
       </h2>
-      <form
-        noValidate
-        className="grid gap-x-5 gap-y-3.5 sm:grid-cols-2"
-        onSubmit={submit}
-      >
+      <form noValidate className="grid gap-x-5 gap-y-3.5 sm:grid-cols-2" onSubmit={submit}>
         <Field label="Full Name" required error={errors.name?.message}>
           {(props) => <input {...props} placeholder="Enter full name" {...register('name')} />}
         </Field>

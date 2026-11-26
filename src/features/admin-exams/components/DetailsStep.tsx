@@ -22,7 +22,11 @@ export function DetailsStep() {
         <h2 className="font-bold sm:col-span-2">Exam Details</h2>
         <Field label="Title" required error={errors.title?.message}>
           {(props) => (
-            <input {...props} placeholder="e.g. MS Office Practical Exam" {...register('title')} />
+            <input
+              {...props}
+              placeholder="e.g. APPSC Group-II Services – Screening Test"
+              {...register('title')}
+            />
           )}
         </Field>
         <Field label="Subject" required error={errors.subject?.message}>

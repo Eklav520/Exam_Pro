@@ -12,7 +12,7 @@ const mockCentres = [
         seatNumber: 'A-004',
         systemId: 'CEN-A-PC-04',
         status: 'ALLOCATED',
-        examId: { title: 'MS Office Practical Exam', durationMinutes: 150 },
+        examId: { title: 'APPSC Computer Proficiency Test', durationMinutes: 150 },
         centreId: {
           code: 'CEN-A',
           name: 'Centre A',
@@ -56,7 +56,7 @@ const mockTerminals = [
         seatNumber: 'A-004',
         systemId: 'CEN-A-PC-04',
         status: 'ALLOCATED',
-        examId: { title: 'MS Office Practical Exam', durationMinutes: 150 },
+        examId: { title: 'APPSC Computer Proficiency Test', durationMinutes: 150 },
         centreId: {
           code: 'CEN-A',
           name: 'Centre A',
@@ -130,7 +130,7 @@ export const centreHandlers = [
         seatNumber: 'A-004',
         systemId: 'CEN-A-PC-04',
         status: 'ALLOCATED',
-        examId: { title: 'MS Office Practical Exam', durationMinutes: 150 },
+        examId: { title: 'APPSC Computer Proficiency Test', durationMinutes: 150 },
         centreId: {
           code: 'CEN-A',
           name: 'Centre A',

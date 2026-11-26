@@ -90,7 +90,7 @@ describe('staff screens', () => {
   it('lists sealed sets waiting for the Higher Official', async () => {
     open(path.adminDashboard, 'u-official');
     expect(
-      await screen.findByText('Review sealed Set 2 – MS Office Practical Exam'),
+      await screen.findByText('Review sealed Set 2 – APPSC Computer Proficiency Test'),
     ).toBeInTheDocument();
     expect(screen.getByText(/Prepared by Priya Sharma/)).toBeInTheDocument();
   });
@@ -101,7 +101,10 @@ describe('staff screens', () => {
     expect(screen.getAllByRole('row')).toHaveLength(3);
     await user.type(screen.getByLabelText('Search paper set'), 'set 4');
     expect(screen.getAllByRole('row')).toHaveLength(2);
-    await user.selectOptions(screen.getByLabelText('Examination'), 'Computer Fundamentals Exam');
+    await user.selectOptions(
+      screen.getByLabelText('Examination'),
+      'APPSC Group-II Services – Screening Test',
+    );
     expect(screen.getByText('No paper sets match these filters.')).toBeInTheDocument();
   });
 

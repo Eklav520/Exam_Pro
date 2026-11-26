@@ -68,7 +68,7 @@ export function DashboardPage() {
                 <p className="truncate text-sm text-muted">
                   Exam:{' '}
                   <span className="font-medium text-ink">
-                    {allocation.examId?.title ?? 'MS Office Practical Exam'}
+                    {allocation.examId?.title ?? 'APPSC Computer Proficiency Test'}
                   </span>
                 </p>
               </div>

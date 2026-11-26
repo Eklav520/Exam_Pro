@@ -42,7 +42,7 @@ const seatDetails: readonly {
   {
     icon: FileText,
     label: 'Exam Name',
-    value: 'MS Office Practical Exam',
+    value: 'APPSC Computer Proficiency Test',
   },
   {
     icon: Building2,

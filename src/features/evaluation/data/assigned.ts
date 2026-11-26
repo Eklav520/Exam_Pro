@@ -21,7 +21,7 @@ const script = (
   status: ScriptStatus,
 ): AssignedScript => ({
   registrationNo: `EXM2026${String(number).padStart(4, '0')}`,
-  exam: 'MS Office Practical Exam',
+  exam: 'APPSC Computer Proficiency Test',
   paperSet: 'Set 3',
   centre,
   assignedOn: '14 Mar 2026',
