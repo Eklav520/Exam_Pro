@@ -44,8 +44,11 @@ describe('users and roles', () => {
     expect(screen.getByText('hema.gupta@exampro.in')).toBeInTheDocument();
   });
 
-  it('validates and adds a user', async () => {
+  it('validates and adds a user from the Add User dialog', async () => {
     const { user } = await open();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Add User' }));
+    expect(screen.getByRole('dialog', { name: 'Add New User' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Create User' }));
     for (const message of ['Enter the full name', 'Enter a valid email address', 'Select a role']) {
       expect(await screen.findByText(message)).toBeInTheDocument();
@@ -61,15 +64,15 @@ describe('users and roles', () => {
     await user.click(screen.getByRole('button', { name: 'Create User' }));
     expect(await screen.findByRole('heading', { name: 'Users (45)' })).toBeInTheDocument();
     expect(bodyRows()[0]).toHaveTextContent('Test Person');
-    expect(screen.getByLabelText(/^Full Name/)).toHaveValue('');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('edits a user, and Cancel goes back to adding', async () => {
+  it('edits a user in a dialog, and Cancel closes it', async () => {
     const { user } = await open();
     await user.click(screen.getByRole('button', { name: 'Edit Ravi Kumar' }));
+    expect(screen.getByRole('dialog', { name: 'Edit User' })).toBeInTheDocument();
     const name = screen.getByLabelText(/^Full Name/);
     expect(name).toHaveValue('Ravi Kumar');
-    expect(name).toHaveFocus();
     await user.clear(name);
     await user.type(name, 'Ravi K');
     await user.click(screen.getByRole('button', { name: 'Save Changes' }));
@@ -77,7 +80,7 @@ describe('users and roles', () => {
 
     await user.click(screen.getByRole('button', { name: 'Edit Priya Sharma' }));
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
-    expect(screen.getByRole('heading', { name: 'Add New User' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('deactivates a user from the row menu', async () => {
