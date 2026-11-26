@@ -64,7 +64,10 @@ describe('setting a paper', () => {
     // The Higher Official signs in on the same browser.
     const official = renderApp({ route: path.adminApprovals, as: 'u-official' });
     await official.user.click(await screen.findByRole('button', { name: /^Set 5/ }));
-    expect(screen.getByText(/Which colour is the sky/)).toBeInTheDocument();
+    expect(screen.getByText('1 Question, 1 Marks')).toBeInTheDocument();
+    expect(screen.getByText('1 Task, 20 Marks')).toBeInTheDocument();
+    // Approvers see the totals, not the questions.
+    expect(screen.queryByText(/Which colour is the sky/)).not.toBeInTheDocument();
     await official.user.click(screen.getByRole('button', { name: 'Approve & Release' }));
     await official.user.click(
       within(screen.getByRole('dialog')).getByRole('button', { name: 'Approve & Release' }),

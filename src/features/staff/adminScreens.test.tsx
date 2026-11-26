@@ -52,7 +52,7 @@ describe('admin screens', () => {
     expect(approve).toBeEnabled();
     await user.click(screen.getByRole('button', { name: /^Set 3/ }));
     expect(approve).toBeDisabled();
-    expect(screen.getByRole('heading', { name: 'Paper Set Preview – Set 3' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Paper Set Details – Set 3' })).toBeInTheDocument();
   });
 
   it('applies monitoring filters on Search', async () => {

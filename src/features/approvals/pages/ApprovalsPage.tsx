@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { paperApproved, paperReturned, selectPapers } from '@/features/question-papers';
 import { Button, ConfirmDialog, EmptyState, Field, PageHeader, useToast } from '@/shared/ui';
-import { PaperPreview } from '../components/PaperPreview';
 import { PaperSetList } from '../components/PaperSetList';
+import { PaperSummary } from '../components/PaperSummary';
 
 type Decision = 'approve' | 'return';
 
@@ -61,7 +61,7 @@ export function ApprovalsPage() {
         <>
           <div className="grid items-start gap-5 lg:grid-cols-[20rem_1fr]">
             <PaperSetList sets={papers} selectedId={paper.id} onSelect={setSelectedId} />
-            <PaperPreview key={paper.id} paper={paper} />
+            <PaperSummary paper={paper} />
           </div>
           <div className="mt-5 flex flex-wrap items-center justify-end gap-3">
             {paper.status !== 'under_review' && (

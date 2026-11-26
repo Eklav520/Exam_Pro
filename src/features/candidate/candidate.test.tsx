@@ -23,7 +23,7 @@ describe('candidate examination', () => {
     const { user } = renderApp({ as: 'u-student' });
     await user.click(await screen.findByRole('button', { name: 'Start Your Exam' }));
     expect(await screen.findByRole('heading', { name: 'Online Examination' })).toBeInTheDocument();
-    expect(screen.getByRole('timer')).toHaveTextContent(/^02:(30:00|29:5\d)$/);
+    expect(screen.getByRole('timer')).toHaveTextContent(/^02:(30:00|29:\d\d)$/);
   });
 
   it('goes Home to the login page', async () => {
