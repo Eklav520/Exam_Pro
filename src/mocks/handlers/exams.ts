@@ -14,7 +14,9 @@ function toStudentExam(exam: Exam, userId: string): StudentExam {
   return { ...toSummary(exam), activeAttemptId: active?.id ?? null };
 }
 
-const published = () => db.exams.filter((exam) => exam.status === 'published');
+// A pattern alone cannot be taken: an exam needs its questions first.
+const published = () =>
+  db.exams.filter((exam) => exam.status === 'published' && exam.questions.length > 0);
 
 export const examHandlers = [
   http.get(url('/exams'), ({ request }) => {

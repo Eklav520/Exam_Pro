@@ -26,6 +26,13 @@ export function formatDateTime(iso: string): string {
   return dateTime.format(new Date(iso));
 }
 
+const dateOnly = new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium' });
+
+/** "12 Mar 2026" from "2026-03-12", read as a local date so it never shifts a day. */
+export function formatDate(day: string): string {
+  return dateOnly.format(new Date(`${day}T00:00`));
+}
+
 export function formatNumber(value: number): string {
   return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }

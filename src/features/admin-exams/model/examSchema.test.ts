@@ -1,47 +1,53 @@
-import { createExamInput, createQuestion, examSchema } from './examSchema';
+import { buildPreset } from './patternPresets';
+import { createExamInput, examSchema } from './examSchema';
 
-const validQuestion = () => {
-  const question = createQuestion();
-  question.text = 'Q';
-  question.options.forEach((option, i) => (option.text = `Option ${i}`));
-  question.correctOptionIds = [question.options[0]!.id];
-  return question;
-};
-const task = { id: 't', app: 'MS Excel', title: 'Marks', instructions: 'Use SUM.', marks: 20 };
-const validExam = () => ({ ...createExamInput(), title: 'Algebra', subject: 'Maths' });
+const validExam = () => ({ ...createExamInput(), title: 'Group-II', subject: 'General Studies' });
+// Part A: 20 MCQs. Part B: Word, Excel and PowerPoint tasks.
+const [mcqPart, practicalPart] = buildPreset('cpt');
 const messages = (value: unknown) =>
   examSchema.safeParse(value).error?.issues.map((issue) => issue.message) ?? [];
+const withGroup = (change: object) => ({
+  ...mcqPart!,
+  groups: [{ ...mcqPart!.groups[0]!, ...change }],
+});
 
 describe('examSchema', () => {
-  it('allows a draft without questions but not a published exam', () => {
+  it('allows a draft without sections but not a published exam', () => {
     expect(messages(validExam())).toEqual([]);
     expect(messages({ ...validExam(), status: 'published' })).toEqual([
-      'Add at least one question or task before publishing',
+      'Add at least one section before publishing',
+    ]);
+    expect(messages({ ...validExam(), status: 'published', sections: [mcqPart] })).toEqual([]);
+  });
+
+  it('accepts a section that mixes question types', () => {
+    expect(practicalPart?.groups.map((group) => group.type)).toEqual([
+      'ms_word',
+      'ms_excel',
+      'ms_powerpoint',
+    ]);
+    expect(messages({ ...validExam(), sections: [mcqPart, practicalPart] })).toEqual([]);
+  });
+
+  it('checks each section and question type', () => {
+    expect(messages({ ...validExam(), sections: [{ ...mcqPart, name: ' ', groups: [] }] })).toEqual(
+      ['Enter the part name', 'Add at least one question type'],
+    );
+    expect(messages({ ...validExam(), sections: [withGroup({ questionCount: 2.5 })] })).toEqual([
+      'Use a whole number',
     ]);
   });
 
-  it('accepts a published exam with only questions, or only tasks', () => {
-    expect(messages({ ...validExam(), status: 'published', questions: [validQuestion()] })).toEqual(
-      [],
-    );
-    expect(messages({ ...validExam(), status: 'published', tasks: [task] })).toEqual([]);
-  });
-
-  it('requires a correct answer, and only one for single-answer questions', () => {
-    const none = { ...validQuestion(), correctOptionIds: [] };
-    expect(messages({ ...validExam(), questions: [none] })).toContain('Choose the correct answer');
-
-    const question = validQuestion();
-    const both = { ...question, correctOptionIds: question.options.map((option) => option.id) };
-    expect(messages({ ...validExam(), questions: [both] })).toContain(
-      'A single-answer question has one correct option',
-    );
-    expect(messages({ ...validExam(), questions: [{ ...both, type: 'multiple' }] })).toEqual([]);
-  });
-
-  it('checks tasks', () => {
-    expect(messages({ ...validExam(), tasks: [{ ...task, instructions: ' ' }] })).toEqual([
-      'Enter the instructions',
+  it('keeps negative marks to objective questions, and below the marks', () => {
+    const word = {
+      ...practicalPart!,
+      groups: [{ ...practicalPart!.groups[0]!, negativeMarks: 1 }],
+    };
+    expect(messages({ ...validExam(), sections: [word] })).toEqual([
+      'Only objective questions can have negative marks',
+    ]);
+    expect(messages({ ...validExam(), sections: [withGroup({ negativeMarks: 3 })] })).toEqual([
+      'Cannot be more than the marks per question',
     ]);
   });
 

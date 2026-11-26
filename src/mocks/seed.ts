@@ -1,5 +1,5 @@
 import { DUMMY_PASSWORD, dummyAccounts } from '@/features/auth/data/dummyAccounts';
-import type { Exam, Question, User } from '@/shared/types';
+import type { Exam, ExamSection, Question, SectionType, User } from '@/shared/types';
 
 export interface MockUser extends User {
   password: string;
@@ -32,13 +32,57 @@ function question(
   };
 }
 
+type Group = [type: SectionType, count: number, marks: number, negative?: number];
+
+function section(id: string, name: string, title: string, groups: Group[]): ExamSection {
+  return {
+    id,
+    name,
+    title,
+    instructions: '',
+    groups: groups.map(([type, questionCount, marksPerQuestion, negativeMarks = 0], index) => ({
+      id: `${id}-${index + 1}`,
+      type,
+      questionCount,
+      marksPerQuestion,
+      negativeMarks,
+    })),
+  };
+}
+
 // APPSC (Andhra Pradesh Public Service Commission) examinations.
 export const seedExams: Exam[] = [
+  {
+    id: 'computer-proficiency-test',
+    title: 'APPSC Computer Proficiency Test',
+    subject: 'Computer Proficiency',
+    description: 'Computer fundamentals, then practical tasks in Word, Excel and PowerPoint.',
+    notificationNo: 'Notification No. 02/2026',
+    examDate: '2026-03-12',
+    sections: [
+      section('cpt-a', 'Part A', 'Computer Fundamentals', [['mcq', 20, 2]]),
+      section('cpt-b', 'Part B', 'Practical', [
+        ['ms_word', 1, 20],
+        ['ms_excel', 1, 20],
+        ['ms_powerpoint', 1, 20],
+      ]),
+    ],
+    durationMinutes: 150,
+    passPercentage: 40,
+    negativeMarking: 0,
+    status: 'published',
+    // Questions come from the paper set the Higher Official approves.
+    questions: [],
+    tasks: [],
+  },
   {
     id: 'group2-screening',
     title: 'APPSC Group-II Services – Screening Test',
     subject: 'General Studies & Mental Ability',
     description: 'History, geography and polity of India and Andhra Pradesh.',
+    notificationNo: 'Notification No. 11/2025',
+    examDate: '2026-02-23',
+    sections: [section('g2-a', 'Part A', 'General Studies & Mental Ability', [['mcq', 5, 2, 0.5]])],
     durationMinutes: 15,
     passPercentage: 50,
     negativeMarking: 0.25,
@@ -87,6 +131,9 @@ export const seedExams: Exam[] = [
     title: 'APPSC Group-I Services – Preliminary (General Aptitude)',
     subject: 'General Aptitude',
     description: 'Percentages, averages, time and work, and the number system.',
+    notificationNo: 'Notification No. 09/2025',
+    examDate: '2026-01-05',
+    sections: [section('g1-a', 'Part A', 'General Aptitude', [['mcq', 4, 1]])],
     durationMinutes: 20,
     passPercentage: 60,
     negativeMarking: 0,
@@ -125,6 +172,15 @@ export const seedExams: Exam[] = [
     title: 'APPSC Panchayat Secretary (Grade-V) – Screening Test',
     subject: 'Rural Development & Panchayat Raj',
     description: 'Panchayat Raj institutions and rural development. Still being written.',
+    notificationNo: 'Notification No. 14/2025',
+    examDate: '',
+    sections: [
+      section('ps-a', 'Part A', 'General Studies', [['mcq', 100, 1, 0.33]]),
+      section('ps-b', 'Part B', 'Rural Development & Panchayat Raj', [
+        ['mcq', 40, 1, 0.33],
+        ['fill_blank', 10, 1],
+      ]),
+    ],
     durationMinutes: 25,
     passPercentage: 50,
     negativeMarking: 0,

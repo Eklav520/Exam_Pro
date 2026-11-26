@@ -32,6 +32,40 @@ export interface PracticalTask {
   marks: number;
 }
 
+/** A kind of question an exam can ask. */
+export type SectionType =
+  | 'mcq'
+  | 'true_false'
+  | 'fill_blank'
+  | 'match'
+  | 'short_answer'
+  | 'descriptive'
+  | 'ms_word'
+  | 'ms_excel'
+  | 'ms_powerpoint';
+
+/** Questions of one type within a section, e.g. "20 MCQs of 2 marks". */
+export interface QuestionGroup {
+  id: string;
+  type: SectionType;
+  /** Questions, or tasks for practical work. */
+  questionCount: number;
+  marksPerQuestion: number;
+  /** Marks lost per wrong answer. Only objective types use it. */
+  negativeMarks: number;
+}
+
+/** One part of an exam's pattern. It can mix question types, e.g. Word, Excel and PowerPoint. */
+export interface ExamSection {
+  id: string;
+  /** "Part A" */
+  name: string;
+  /** "General Studies"; may be empty. */
+  title: string;
+  instructions: string;
+  groups: QuestionGroup[];
+}
+
 export interface ExamSummary {
   id: string;
   title: string;
@@ -42,6 +76,12 @@ export interface ExamSummary {
   /** Fraction of a question's marks deducted for a wrong answer (0 = none). */
   negativeMarking: number;
   status: ExamStatus;
+  /** E.g. "Notification No. 11/2025". Absent on exams created before patterns. */
+  notificationNo?: string;
+  /** yyyy-mm-dd, or empty when not scheduled yet. */
+  examDate?: string;
+  /** The exam's pattern. Paper setters prepare questions to match it. */
+  sections?: ExamSection[];
   questionCount: number;
   taskCount: number;
   /** Questions and tasks together. */

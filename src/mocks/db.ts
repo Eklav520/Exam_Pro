@@ -21,7 +21,7 @@ interface Database {
 }
 
 // Bump the version when the seed data changes, so browsers drop their old copy.
-const STORAGE_KEY = 'exam-pro.mock-db.v2';
+const STORAGE_KEY = 'exam-pro.mock-db.v4';
 
 const createSeed = (): Database =>
   structuredClone({ users: seedUsers, exams: seedExams, attempts: [] });

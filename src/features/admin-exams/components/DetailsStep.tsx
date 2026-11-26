@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { useFormContext, useWatch } from 'react-hook-form';
-import type { ExamInput } from '@/shared/types';
 import { Card, Field } from '@/shared/ui';
+import type { ExamFormValues } from '../model/examSchema';
 
 const statuses = [
   { value: 'draft', label: 'Draft', hint: 'Only staff can see it.' },
@@ -13,7 +13,7 @@ export function DetailsStep() {
     register,
     control,
     formState: { errors },
-  } = useFormContext<ExamInput>();
+  } = useFormContext<ExamFormValues>();
   const status = useWatch({ control, name: 'status' });
 
   return (
@@ -31,8 +31,24 @@ export function DetailsStep() {
         </Field>
         <Field label="Subject" required error={errors.subject?.message}>
           {(props) => (
-            <input {...props} placeholder="e.g. Computer Skills" {...register('subject')} />
+            <input {...props} placeholder="e.g. General Studies" {...register('subject')} />
           )}
+        </Field>
+        <Field label="Notification No." error={errors.notificationNo?.message}>
+          {(props) => (
+            <input
+              {...props}
+              placeholder="e.g. Notification No. 11/2025"
+              {...register('notificationNo')}
+            />
+          )}
+        </Field>
+        <Field
+          label="Exam Date"
+          error={errors.examDate?.message}
+          hint="Leave empty if not fixed yet."
+        >
+          {(props) => <input {...props} type="date" {...register('examDate')} />}
         </Field>
         <div className="sm:col-span-2">
           <Field label="Description" hint="Shown to students before they start.">
@@ -63,20 +79,9 @@ export function DetailsStep() {
               )}
             </Field>
           </div>
-          <Field
-            label="Negative marking"
-            error={errors.negativeMarking?.message}
-            hint="Share of a question's marks lost for a wrong answer, e.g. 0.25. 0 for none."
-          >
-            {(props) => (
-              <input
-                {...props}
-                type="number"
-                step="any"
-                {...register('negativeMarking', { valueAsNumber: true })}
-              />
-            )}
-          </Field>
+          <p className="text-sm text-muted">
+            Marks and negative marking are set for each section in the next step.
+          </p>
         </Card>
         <Card>
           <fieldset>

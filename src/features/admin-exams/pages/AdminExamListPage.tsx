@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getErrorMessage } from '@/shared/api/getErrorMessage';
 import { path, to } from '@/shared/config/paths';
-import { formatDuration } from '@/shared/lib/format';
+import { formatDate, formatDuration } from '@/shared/lib/format';
 import type { ExamSummary } from '@/shared/types';
 import {
   Alert,
@@ -22,6 +22,15 @@ import {
   type Column,
 } from '@/shared/ui';
 import { useDeleteExamMutation, useGetAdminExamsQuery } from '../api/adminExamsApi';
+import { getPatternTotals, sectionTypes } from '../model/sectionTypes';
+
+/** Exams made before patterns have no sections; their totals come from their questions. */
+function getTotals(exam: ExamSummary) {
+  const sections = exam.sections ?? [];
+  return sections.length > 0
+    ? getPatternTotals(sections)
+    : { questions: exam.questionCount + exam.taskCount, marks: exam.totalMarks };
+}
 
 const ALL = 'all';
 
@@ -54,12 +63,36 @@ export function AdminExamListPage() {
         <span>
           <span className="block font-semibold">{exam.title}</span>
           <span className="text-sm text-muted">{exam.subject}</span>
+          {exam.notificationNo && (
+            <span className="block text-xs text-muted">{exam.notificationNo}</span>
+          )}
         </span>
       ),
     },
-    { header: 'MCQs', align: 'center', cell: (exam) => exam.questionCount },
-    { header: 'Practical Tasks', align: 'center', cell: (exam) => exam.taskCount },
-    { header: 'Total Marks', align: 'center', cell: (exam) => exam.totalMarks },
+    {
+      header: 'Exam Date',
+      cell: (exam) => (exam.examDate ? formatDate(exam.examDate) : '–'),
+    },
+    {
+      header: 'Sections',
+      cell: (exam) =>
+        exam.sections?.length ? (
+          <ul className="space-y-0.5 text-sm">
+            {exam.sections.map((section) => (
+              <li key={section.id}>
+                <span className="font-semibold">{section.name}:</span>{' '}
+                {section.groups
+                  .map((group) => `${sectionTypes[group.type].label} × ${group.questionCount}`)
+                  .join(', ')}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span className="text-muted">Not set</span>
+        ),
+    },
+    { header: 'Questions', align: 'center', cell: (exam) => getTotals(exam).questions },
+    { header: 'Total Marks', align: 'center', cell: (exam) => getTotals(exam).marks },
     { header: 'Duration', cell: (exam) => formatDuration(exam.durationMinutes) },
     { header: 'Pass Mark', align: 'center', cell: (exam) => `${exam.passPercentage}%` },
     {
@@ -96,7 +129,7 @@ export function AdminExamListPage() {
     <>
       <PageHeader
         title="Examinations"
-        description="Create exams, add their questions and practical tasks, and publish them."
+        description="Set up each examination and its pattern: the sections, question types and marks. Paper setters then prepare question papers to match."
         actions={
           <Link to={path.adminExamNew} className={buttonClass()}>
             <Plus aria-hidden className="size-4" />

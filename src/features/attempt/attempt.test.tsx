@@ -65,7 +65,7 @@ describe('taking an exam', () => {
   });
 
   it('submits automatically when time runs out', async () => {
-    db.exams[0]!.durationMinutes = 1.5 / 60;
+    db.exams.find((exam) => exam.id === 'group2-screening')!.durationMinutes = 1.5 / 60;
     const { user, router } = await startExam();
     await user.click(screen.getByLabelText('Kurnool'));
     await waitFor(() => expect(router.state.location.pathname).toMatch(/^\/results\//), {
