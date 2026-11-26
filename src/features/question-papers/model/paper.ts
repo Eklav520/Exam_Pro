@@ -1,4 +1,5 @@
 import { nanoid } from '@reduxjs/toolkit';
+import type { PracticalApp, PracticalTask } from '@/shared/types';
 
 export type PaperStatus = 'draft' | 'under_review' | 'approved';
 
@@ -10,16 +11,12 @@ export interface McqItem {
   marks: number;
 }
 
-export const practicalApps = ['MS Word', 'MS Excel', 'MS PowerPoint'] as const;
-export type PracticalApp = (typeof practicalApps)[number];
-
-export interface PracticalItem {
-  id: string;
-  app: PracticalApp;
-  title: string;
-  instructions: string;
-  marks: number;
-}
+export const practicalApps = [
+  'MS Word',
+  'MS Excel',
+  'MS PowerPoint',
+] as const satisfies readonly PracticalApp[];
+export type PracticalItem = PracticalTask;
 
 export interface PaperSet {
   id: string;

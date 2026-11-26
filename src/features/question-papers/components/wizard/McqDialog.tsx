@@ -63,7 +63,7 @@ export function McqDialog({ item, onSave, onClose }: McqDialogProps) {
   });
 
   return (
-    <Modal open titleId={titleId} onClose={onClose} className="max-w-xl!">
+    <Modal open titleId={titleId} onClose={onClose} className="max-w-3xl!">
       <h2 id={titleId} className="mb-4 text-lg font-bold">
         {item ? 'Edit Question' : 'Add Question'}
       </h2>

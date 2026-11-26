@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useStaffRole } from '@/features/staff';
 import { path } from '@/shared/config/paths';
-import { Alert, Button, Card, PageHeader, useToast } from '@/shared/ui';
+import { Alert, Button, Card, ItemTable, PageHeader, Stepper, useToast } from '@/shared/ui';
 import {
   createPaper,
   getNextSetName,
@@ -18,9 +18,7 @@ import {
 import { paperSaved, paperSubmitted, selectPapers } from '../../model/papersSlice';
 import { PaperSections } from '../PaperSections';
 import { DetailsStep } from './DetailsStep';
-import { ItemTable } from './ItemTable';
 import { McqDialog } from './McqDialog';
-import { Stepper } from './Stepper';
 import { TaskDialog } from './TaskDialog';
 
 const steps = ['Paper Details', 'Part A – MCQ', 'Part B – Practical', 'Review'] as const;

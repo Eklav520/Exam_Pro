@@ -7,6 +7,7 @@ const validQuestion = () => {
   question.correctOptionIds = [question.options[0]!.id];
   return question;
 };
+const task = { id: 't', app: 'MS Excel', title: 'Marks', instructions: 'Use SUM.', marks: 20 };
 const validExam = () => ({ ...createExamInput(), title: 'Algebra', subject: 'Maths' });
 const messages = (value: unknown) =>
   examSchema.safeParse(value).error?.issues.map((issue) => issue.message) ?? [];
@@ -15,13 +16,15 @@ describe('examSchema', () => {
   it('allows a draft without questions but not a published exam', () => {
     expect(messages(validExam())).toEqual([]);
     expect(messages({ ...validExam(), status: 'published' })).toEqual([
-      'Add at least one question before publishing',
+      'Add at least one question or task before publishing',
     ]);
   });
 
-  it('accepts a complete published exam', () => {
-    const exam = { ...validExam(), status: 'published', questions: [validQuestion()] };
-    expect(messages(exam)).toEqual([]);
+  it('accepts a published exam with only questions, or only tasks', () => {
+    expect(messages({ ...validExam(), status: 'published', questions: [validQuestion()] })).toEqual(
+      [],
+    );
+    expect(messages({ ...validExam(), status: 'published', tasks: [task] })).toEqual([]);
   });
 
   it('requires a correct answer, and only one for single-answer questions', () => {
@@ -34,6 +37,12 @@ describe('examSchema', () => {
       'A single-answer question has one correct option',
     );
     expect(messages({ ...validExam(), questions: [{ ...both, type: 'multiple' }] })).toEqual([]);
+  });
+
+  it('checks tasks', () => {
+    expect(messages({ ...validExam(), tasks: [{ ...task, instructions: ' ' }] })).toEqual([
+      'Enter the instructions',
+    ]);
   });
 
   it('reports empty number inputs (NaN)', () => {

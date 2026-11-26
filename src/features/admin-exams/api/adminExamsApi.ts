@@ -5,10 +5,13 @@ const adminExamsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getAdminExams: build.query<ExamSummary[], void>({
       query: () => '/admin/exams',
+      transformResponse: (exams: ExamSummary[]) =>
+        exams.map((exam) => ({ ...exam, taskCount: exam.taskCount ?? 0 })),
       providesTags: ['AdminExam'],
     }),
     getAdminExam: build.query<Exam, string>({
       query: (id) => `/admin/exams/${id}`,
+      transformResponse: (exam: Exam) => ({ ...exam, tasks: exam.tasks ?? [] }),
       providesTags: (_result, _error, id) => [{ type: 'AdminExam', id }],
       // An edit form must start from the latest version.
       keepUnusedDataFor: 0,

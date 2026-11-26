@@ -4,11 +4,13 @@ import { Check, ChevronRight } from 'lucide-react';
 interface StepperProps {
   steps: readonly string[];
   current: number;
+  /** Steps that can be opened; by default those up to the current one. */
+  reachable?: number;
   onSelect: (index: number) => void;
 }
 
-/** Earlier steps can be reopened; later ones are reached with Save & Next. */
-export function Stepper({ steps, current, onSelect }: StepperProps) {
+/** Shows progress through a form; steps within reach can be opened directly. */
+export function Stepper({ steps, current, reachable = current + 1, onSelect }: StepperProps) {
   return (
     <ol className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-3 rounded-xl border border-line px-4 py-3 sm:justify-between">
       {steps.map((step, index) => {
@@ -18,14 +20,14 @@ export function Stepper({ steps, current, onSelect }: StepperProps) {
           <li key={step} className="flex items-center gap-2">
             <button
               type="button"
-              disabled={index > current}
+              disabled={index >= reachable}
               aria-current={isCurrent ? 'step' : undefined}
               onClick={() => onSelect(index)}
               className={clsx(
                 'flex items-center gap-2.5 rounded-full py-1 pr-4 pl-1 text-sm font-semibold disabled:cursor-not-allowed',
                 isCurrent && 'bg-brand-50',
                 isDone && 'hover:bg-canvas',
-                index > current && 'text-muted',
+                index > current && index >= reachable && 'text-muted',
               )}
             >
               <span

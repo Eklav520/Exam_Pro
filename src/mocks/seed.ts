@@ -40,6 +40,7 @@ export const seedExams: Exam[] = [
     passPercentage: 50,
     negativeMarking: 0.25,
     status: 'published',
+    tasks: [],
     questions: [
       question(
         'js1',
@@ -87,6 +88,7 @@ export const seedExams: Exam[] = [
     passPercentage: 60,
     negativeMarking: 0,
     status: 'published',
+    tasks: [],
     questions: [
       question('qa1', 'What is 15% of 240?', ['24', '30', '36', '40'], [2], '0.15 × 240 = 36.', 1),
       question(
@@ -124,6 +126,7 @@ export const seedExams: Exam[] = [
     passPercentage: 50,
     negativeMarking: 0,
     status: 'draft',
+    tasks: [],
     questions: [
       question(
         'sql1',

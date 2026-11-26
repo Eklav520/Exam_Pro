@@ -20,6 +20,7 @@ const exam: Exam = {
   passPercentage: 50,
   negativeMarking: 0.25,
   status: 'published',
+  tasks: [],
   questions: [question('q1', ['a'], 2), question('q2', ['a', 'b'], 2)],
 };
 

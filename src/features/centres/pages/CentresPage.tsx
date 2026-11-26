@@ -39,7 +39,10 @@ interface ParsedExcelRow {
 }
 
 function formatMacInput(raw: string): string {
-  const hex = raw.replace(/[^0-9A-Fa-f]/g, '').slice(0, 12).toUpperCase();
+  const hex = raw
+    .replace(/[^0-9A-Fa-f]/g, '')
+    .slice(0, 12)
+    .toUpperCase();
   return hex.match(/.{1,2}/g)?.join(':') ?? '';
 }
 
@@ -124,11 +127,17 @@ export function CentresPage() {
     const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet);
 
     const validated: ParsedExcelRow[] = rawRows.map((row) => {
-      const cCode = String(row['Centre Code'] ?? row.centreCode ?? '').trim().toUpperCase();
+      const cCode = String(row['Centre Code'] ?? row.centreCode ?? '')
+        .trim()
+        .toUpperCase();
       const cName = String(row['Centre Name'] ?? row.centreName ?? cCode).trim();
       const city = String(row['City'] ?? row.city ?? '').trim();
-      const seat = String(row['Seat Number'] ?? row.seatNumber ?? '').trim().toUpperCase();
-      const sysId = String(row['System ID'] ?? row.systemId ?? '').trim().toUpperCase();
+      const seat = String(row['Seat Number'] ?? row.seatNumber ?? '')
+        .trim()
+        .toUpperCase();
+      const sysId = String(row['System ID'] ?? row.systemId ?? '')
+        .trim()
+        .toUpperCase();
       const ip = String(row['IPv4 Address'] ?? row.ipv4Address ?? '').trim();
       const mac = String(row['MAC Address'] ?? row.macAddress ?? '')
         .trim()
@@ -162,7 +171,9 @@ export function CentresPage() {
   const handleBulkSave = async () => {
     const validRows = parsedRows.filter((r) => r.valid);
     if (validRows.length === 0) return;
-    const res = await bulkImport({ rows: validRows as unknown as Record<string, unknown>[] }).unwrap();
+    const res = await bulkImport({
+      rows: validRows as unknown as Record<string, unknown>[],
+    }).unwrap();
     setStatusMessage(`Imported ${res.inserted} new, updated ${res.updated} terminals.`);
     setParsedRows([]);
     void refetchCentres();
@@ -262,7 +273,8 @@ export function CentresPage() {
                 Click to upload `.xlsx` or `.csv` terminal sheet
               </span>
               <span className="mt-1 text-xs text-muted">
-                Columns: Centre Code, Centre Name, City, Seat Number, System ID, IPv4 Address, MAC Address
+                Columns: Centre Code, Centre Name, City, Seat Number, System ID, IPv4 Address, MAC
+                Address
               </span>
               <input
                 type="file"

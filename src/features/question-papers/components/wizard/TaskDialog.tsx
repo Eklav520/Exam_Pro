@@ -39,7 +39,7 @@ export function TaskDialog({ item, onSave, onClose }: TaskDialogProps) {
   });
 
   return (
-    <Modal open titleId={titleId} onClose={onClose} className="max-w-xl!">
+    <Modal open titleId={titleId} onClose={onClose} className="max-w-3xl!">
       <h2 id={titleId} className="mb-4 text-lg font-bold">
         {item ? 'Edit Task' : 'Add Task'}
       </h2>

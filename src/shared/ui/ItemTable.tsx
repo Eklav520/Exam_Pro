@@ -1,23 +1,29 @@
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { Badge, Button, DataTable, IconButton, type Column } from '@/shared/ui';
+import { Badge } from './Badge';
+import { Button } from './Button';
+import { DataTable, type Column } from './DataTable';
+import { IconButton } from './IconButton';
 
 interface ItemTableProps<Item extends { id: string; marks: number }> {
   title: string;
   /** Singular, for buttons: "Question". */
   itemName: string;
   items: Item[];
+  /** Defaults to the item id. */
+  getKey?: (item: Item) => string;
   columns: Column<Item>[];
   onAdd: () => void;
-  onEdit: (item: Item) => void;
-  onDelete: (item: Item) => void;
+  onEdit: (item: Item, index: number) => void;
+  onDelete: (item: Item, index: number) => void;
 }
 
-/** The question and task lists share everything but their columns. */
+/** A list of questions or tasks: add, edit, delete and totals. */
 export function ItemTable<Item extends { id: string; marks: number }>({
   title,
   itemName,
   items,
   columns,
+  getKey = (item) => item.id,
   onAdd,
   onEdit,
   onDelete,
@@ -42,7 +48,7 @@ export function ItemTable<Item extends { id: string; marks: number }>({
       <DataTable
         caption={title}
         rows={items}
-        getRowKey={(item) => item.id}
+        getRowKey={getKey}
         emptyMessage={`No ${itemName.toLowerCase()}s yet. Use “Add ${itemName}” to start.`}
         columns={[
           { header: 'No.', cell: (_item, index) => index + 1 },
@@ -56,13 +62,13 @@ export function ItemTable<Item extends { id: string; marks: number }>({
                 <IconButton
                   icon={Pencil}
                   label={`Edit ${name(index)}`}
-                  onClick={() => onEdit(item)}
+                  onClick={() => onEdit(item, index)}
                 />
                 <IconButton
                   icon={Trash2}
                   danger
                   label={`Delete ${name(index)}`}
-                  onClick={() => onDelete(item)}
+                  onClick={() => onDelete(item, index)}
                 />
               </span>
             ),

@@ -21,6 +21,17 @@ export interface Question extends PublicQuestion {
   explanation: string;
 }
 
+export type PracticalApp = 'MS Word' | 'MS Excel' | 'MS PowerPoint';
+
+/** A hands-on task done in an office application and marked by an evaluator. */
+export interface PracticalTask {
+  id: string;
+  app: PracticalApp;
+  title: string;
+  instructions: string;
+  marks: number;
+}
+
 export interface ExamSummary {
   id: string;
   title: string;
@@ -32,11 +43,14 @@ export interface ExamSummary {
   negativeMarking: number;
   status: ExamStatus;
   questionCount: number;
+  taskCount: number;
+  /** Questions and tasks together. */
   totalMarks: number;
 }
 
-export interface Exam extends Omit<ExamSummary, 'questionCount' | 'totalMarks'> {
+export interface Exam extends Omit<ExamSummary, 'questionCount' | 'taskCount' | 'totalMarks'> {
   questions: Question[];
+  tasks: PracticalTask[];
 }
 
 export type ExamInput = Omit<Exam, 'id'>;

@@ -27,7 +27,10 @@ export const routes: RouteObject[] = [
             element: <RequireRole role="student" />,
             children: [
               { path: path.candidateLaunch, element: <Navigate to={path.dashboard} replace /> },
-              { path: `${path.candidateLaunch}/*`, element: <Navigate to={path.dashboard} replace /> },
+              {
+                path: `${path.candidateLaunch}/*`,
+                element: <Navigate to={path.dashboard} replace />,
+              },
               {
                 // Full screen: no navigation while an exam is running.
                 path: path.attempt,

@@ -27,10 +27,12 @@ export function required<T>(value: T | undefined, name: string): T {
 }
 
 export function toSummary(exam: Exam): ExamSummary {
-  const { questions, ...rest } = exam;
+  const { questions, tasks, ...rest } = exam;
+  const items = [...questions, ...tasks];
   return {
     ...rest,
     questionCount: questions.length,
-    totalMarks: questions.reduce((sum, question) => sum + question.marks, 0),
+    taskCount: tasks.length,
+    totalMarks: items.reduce((sum, item) => sum + item.marks, 0),
   };
 }

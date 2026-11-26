@@ -32,19 +32,24 @@ export function StudentPortalPage() {
             <ShieldCheck className="size-6" />
           </div>
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-ink">
-              Download Secure Exam Browser (.exe)
-            </h2>
+            <h2 className="text-lg font-semibold text-ink">Download Secure Exam Browser (.exe)</h2>
             <p className="text-sm text-muted">
-              Standard web browsers (Chrome, Edge, Firefox) cannot run proctored exams. Launch
-              the Windows Secure Exam Browser on your registered lab terminal to verify your seat
-              and start your exam.
+              Standard web browsers (Chrome, Edge, Firefox) cannot run proctored exams. Launch the
+              Windows Secure Exam Browser on your registered lab terminal to verify your seat and
+              start your exam.
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 pt-2">
-          <Button type="button" onClick={() => window.alert('ExamPro Secure Browser (.exe) installer will be downloaded from your centre distribution server.')}>
+          <Button
+            type="button"
+            onClick={() =>
+              window.alert(
+                'ExamPro Secure Browser (.exe) installer will be downloaded from your centre distribution server.',
+              )
+            }
+          >
             <Download className="size-4" />
             Download ExamPro Browser (.exe)
           </Button>
