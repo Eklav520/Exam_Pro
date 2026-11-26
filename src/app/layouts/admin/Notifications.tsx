@@ -10,11 +10,12 @@ const notifications = [
 export function Notifications() {
   return (
     <Dropdown
+      inverse
       label={`Notifications, ${notifications.length} new`}
       trigger={
         <span className="relative p-1">
           <Bell aria-hidden className="size-6" strokeWidth={1.75} />
-          <span className="absolute top-0.5 right-0.5 size-2.5 rounded-full border-2 border-white bg-danger" />
+          <span className="absolute top-0.5 right-0.5 size-2.5 rounded-full border-2 border-navy-800 bg-danger" />
         </span>
       }
     >

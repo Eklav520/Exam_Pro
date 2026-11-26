@@ -10,10 +10,11 @@ export function AccountMenu() {
 
   return (
     <Dropdown
+      inverse
       label={`Account menu, ${role.label}`}
       trigger={
         <>
-          <span className="flex size-9 items-center justify-center rounded-full bg-avatar text-sm font-bold text-white">
+          <span className="flex size-9 items-center justify-center rounded-full bg-avatar text-sm font-bold text-white ring-2 ring-white/30">
             {role.initials}
           </span>
           <span className="hidden font-semibold sm:inline">{role.label}</span>

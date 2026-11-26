@@ -41,11 +41,13 @@ export function AdminLayout({ hasSidebar = true }: AdminLayoutProps) {
           </>
         )}
         <div className={clsx(hasSidebar && 'lg:pl-64')}>
-          <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-surface px-4 lg:px-8">
+          {/* Navy like the sidebar, so the two read as one frame around the page. */}
+          <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-white/10 bg-navy-800 px-4 text-white lg:px-8">
             {hasSidebar ? (
               <IconButton
                 icon={Menu}
                 label="Open menu"
+                inverse
                 aria-expanded={isMenuOpen}
                 aria-controls="admin-sidebar"
                 className="lg:hidden"
@@ -58,7 +60,7 @@ export function AdminLayout({ hasSidebar = true }: AdminLayoutProps) {
             )}
             <div className="ml-auto flex items-center gap-3">
               <Notifications />
-              <span aria-hidden className="h-6 w-px bg-line" />
+              <span aria-hidden className="h-6 w-px bg-white/20" />
               <AccountMenu />
             </div>
           </header>
