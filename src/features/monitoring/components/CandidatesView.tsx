@@ -65,7 +65,7 @@ export function CandidatesView() {
 
   const error = centresQuery.error ?? terminalsQuery.error;
   if (error) {
-    return (
+  return (
       <PageError
         error={error}
         onRetry={() => {
@@ -95,7 +95,7 @@ export function CandidatesView() {
   const rows = seated.filter((row) => {
     // Until mapped, a candidate counts where they most want to write.
     const place = row.centre ?? centreById(row.preferences[0]);
-    return (
+  return (
       applied.exam === SAMPLE_EXAM &&
       applied.date === SAMPLE_EXAM_DATE &&
       (applied.state === ALL || place?.state === applied.state) &&
@@ -212,6 +212,7 @@ export function CandidatesView() {
     },
   ];
 
+  const [shift, setShift] = useState('ALL');
   return (
     <>
       <FilterBar label="Filter candidates" onSubmit={() => setApplied(filters)}>
@@ -220,9 +221,9 @@ export function CandidatesView() {
           value={filters.exam}
           options={sampleExams}
           onChange={(exam) => set({ exam })}
-          className="flex-1 sm:min-w-56"
+          className="min-w-0 flex-[1.2]"
         />
-        <div className="min-w-36 flex-1">
+        <div className="w-36 shrink-0">
           <label htmlFor={dateId} className="mb-1 block text-xs font-medium">
             Exam Date
           </label>
@@ -235,11 +236,22 @@ export function CandidatesView() {
           />
         </div>
         <SelectField
+          label="Shift"
+          value={shift}
+          options={[
+            { value: 'ALL', label: 'All Shifts' },
+            { value: '1', label: 'Shift 1' },
+            { value: '2', label: 'Shift 2' },
+          ]}
+          onChange={setShift}
+          className="min-w-0 flex-[0.65]"
+        />
+        <SelectField
           label="State"
           value={filters.state}
           options={[{ value: ALL, label: 'All States' }, ...unique(centres.map((c) => c.state))]}
           onChange={(state) => set({ state, district: ALL, centre: ALL })}
-          className="flex-1"
+          className="min-w-0 flex-[0.75]"
         />
         <SelectField
           label="District"
@@ -249,7 +261,7 @@ export function CandidatesView() {
             ...unique(inState.map((c) => c.district)),
           ]}
           onChange={(district) => set({ district, centre: ALL })}
-          className="flex-1"
+          className="min-w-0 flex-[0.75]"
         />
         <SelectField
           label="Centre"
@@ -262,14 +274,14 @@ export function CandidatesView() {
             })),
           ]}
           onChange={(centre) => set({ centre })}
-          className="flex-1"
+          className="min-w-0 flex-[0.75]"
         />
         <SelectField
           label="Mapping"
           value={filters.mapping}
           options={mappingOptions}
           onChange={(mapping) => set({ mapping })}
-          className="flex-1"
+          className="min-w-0 flex-[0.6]"
         />
         <SelectField
           label="Status"
@@ -279,7 +291,7 @@ export function CandidatesView() {
             ...Object.entries(examStatuses).map(([value, { label }]) => ({ value, label })),
           ]}
           onChange={(status) => set({ status })}
-          className="flex-1"
+          className="min-w-0 flex-[0.6]"
         />
         <Button type="submit">
           <Search aria-hidden className="size-4" />
@@ -299,7 +311,7 @@ export function CandidatesView() {
           Candidates are mapped to their 1st choice centre, then their 2nd and 3rd when it is full.
           Faulty computers are never used.
         </p>
-        <Button variant="secondary" disabled={unmapped === 0} onClick={handleAutoMap}>
+        <Button variant="primary" disabled={unmapped === 0} onClick={handleAutoMap}>
           <Wand2 aria-hidden className="size-4" />
           Auto-map by Preference ({unmapped})
         </Button>

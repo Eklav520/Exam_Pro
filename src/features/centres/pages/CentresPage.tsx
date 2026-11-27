@@ -5,18 +5,17 @@ import {
   FileSpreadsheet,
   Monitor,
   Plus,
-  Search,
   Server,
   Upload,
-  Wand2,
   XCircle,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import * as XLSX from 'xlsx';
+import { SystemsView } from '@/features/monitoring';
 import { useDocumentTitle } from '@/shared/hooks/useDocumentTitle';
-import { Badge, Button, Card, PageHeader, StatCard } from '@/shared/ui';
+import { Button, Card, PageHeader, StatCard } from '@/shared/ui';
 import {
-  useAutoAssignSeatsMutation,
+  useBulkImportCentresMutation,
   useBulkImportTerminalsMutation,
   useGetCentresQuery,
   useGetTerminalsQuery,
@@ -36,6 +35,40 @@ interface ParsedExcelRow {
   macAddress: string;
   valid: boolean;
   error?: string;
+}
+
+interface ParsedCentreRow {
+  code: string;
+  name: string;
+  state: string;
+  district: string;
+  mandal: string;
+  pincode: string;
+  address: string;
+  totalSystems: number;
+  bufferSystems: number;
+  valid: boolean;
+  error?: string;
+}
+
+function downloadCentresTemplate() {
+  const rows = [
+    {
+      'Centre Code': 'CEN-A',
+      'Centre Name': 'JNTUACEP Lab Block 1',
+      State: 'Andhra Pradesh',
+      District: 'YSR Kadapa',
+      Mandal: 'Pulivendula',
+      Pincode: '516390',
+      Address: 'Main Campus, Lab Block 1',
+      'Total Systems': 150,
+      'Buffer Systems': 10,
+    },
+  ];
+  const sheet = XLSX.utils.json_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, sheet, 'Centres');
+  XLSX.writeFile(workbook, 'ExamPro_Centres_Template.xlsx');
 }
 
 function formatMacInput(raw: string): string {
@@ -78,11 +111,11 @@ export function CentresPage() {
   const { data: centresData, refetch: refetchCentres } = useGetCentresQuery();
   const { data: terminalsData, refetch: refetchTerminals } = useGetTerminalsQuery();
   const [registerTerminal, { isLoading: isRegistering }] = useRegisterTerminalMutation();
+  const [bulkImportCentres, { isLoading: isImportingCentres }] = useBulkImportCentresMutation();
   const [bulkImport, { isLoading: isImporting }] = useBulkImportTerminalsMutation();
-  const [autoAssign, { isLoading: isAssigning }] = useAutoAssignSeatsMutation();
 
-  const [activeTab, setActiveTab] = useState<'excel' | 'manual'>('excel');
-  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'centres' | 'excel' | 'manual'>('centres');
+  const [parsedCentres, setParsedCentres] = useState<ParsedCentreRow[]>([]);
   const [parsedRows, setParsedRows] = useState<ParsedExcelRow[]>([]);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
@@ -94,27 +127,66 @@ export function CentresPage() {
   const [ipv4Address, setIpv4Address] = useState('');
   const [macAddress, setMacAddress] = useState('');
 
-  // Auto-allocate state
-  const [examId, setExamId] = useState('default-exam');
-  const [allocatedPreview, setAllocatedPreview] = useState<
-    { rollNo: string; candidateName: string; systemId: string; seatNumber: string }[]
-  >([]);
-
   const centres = centresData?.centres ?? [];
   const terminals = terminalsData?.terminals ?? [];
 
-  const filteredTerminals = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return terminals;
-    return terminals.filter(
-      (t) =>
-        t.centreCode.toLowerCase().includes(q) ||
-        t.systemId.toLowerCase().includes(q) ||
-        t.seatNumber.toLowerCase().includes(q) ||
-        t.ipv4Address.toLowerCase().includes(q) ||
-        t.macAddress.toLowerCase().includes(q),
-    );
-  }, [terminals, search]);
+  const handleCentreFileUpload = async (file: File | undefined) => {
+    if (!file) return;
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
+    const firstSheetName = workbook.SheetNames[0];
+    if (!firstSheetName) return;
+    const firstSheet = workbook.Sheets[firstSheetName];
+    if (!firstSheet) return;
+    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet);
+
+    const validated: ParsedCentreRow[] = rawRows.map((row) => {
+      const code = String(row['Centre Code'] ?? row.code ?? '').trim().toUpperCase();
+      const name = String(row['Centre Name'] ?? row.name ?? '').trim();
+      const state = String(row.State ?? row.state ?? '').trim();
+      const district = String(row.District ?? row.district ?? '').trim();
+      const mandal = String(row.Mandal ?? row.mandal ?? '').trim();
+      const pincode = String(row.Pincode ?? row.pincode ?? '').trim();
+      const address = String(row.Address ?? row.address ?? '').trim();
+      const totalSystems = Number(row['Total Systems'] ?? row.totalSystems ?? 0);
+      const bufferSystems = Number(row['Buffer Systems'] ?? row.bufferSystems ?? 0);
+
+      const errors: string[] = [];
+      if (!code) errors.push('Missing Centre Code');
+      if (!name) errors.push('Missing Centre Name');
+      if (!state) errors.push('Missing State');
+      if (!district) errors.push('Missing District');
+      if (!pincode || !/^\d{6}$/.test(pincode)) errors.push('Invalid Pincode');
+
+      return {
+        code,
+        name,
+        state,
+        district,
+        mandal,
+        pincode,
+        address,
+        totalSystems,
+        bufferSystems,
+        valid: errors.length === 0,
+        error: errors.join(', '),
+      };
+    });
+
+    setParsedCentres(validated);
+    setStatusMessage(null);
+  };
+
+  const handleBulkSaveCentres = async () => {
+    const validRows = parsedCentres.filter((r) => r.valid);
+    if (validRows.length === 0) return;
+    const res = await bulkImportCentres({
+      rows: validRows as unknown as Record<string, unknown>[],
+    }).unwrap();
+    setStatusMessage(`Imported ${res.inserted} new, updated ${res.updated} centres.`);
+    setParsedCentres([]);
+    void refetchCentres();
+  };
 
   const handleFileUpload = async (file: File | undefined) => {
     if (!file) return;
@@ -203,12 +275,6 @@ export function CentresPage() {
     void refetchTerminals();
   };
 
-  const handleAutoAllocate = async () => {
-    const res = await autoAssign({ examId }).unwrap();
-    setAllocatedPreview(res.allocations);
-    setStatusMessage(`Auto-allocated ${res.allocatedCount} seat(s).`);
-  };
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -240,32 +306,121 @@ export function CentresPage() {
         </div>
       )}
 
-      {/* Two Primary Tabs: Bulk Excel vs Manual Entry */}
+      {/* Three Primary Tabs: Centres Excel, Terminals Excel, Manual Entry */}
       <Card className="p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={activeTab === 'centres' ? 'primary' : 'secondary'}
+              onClick={() => setActiveTab('centres')}
+            >
+              <Building2 className="size-4" />
+              1. Upload Centres Excel
+            </Button>
             <Button
               variant={activeTab === 'excel' ? 'primary' : 'secondary'}
               onClick={() => setActiveTab('excel')}
             >
               <FileSpreadsheet className="size-4" />
-              Option A: Bulk Excel Upload
+              2. Upload Terminals Excel
             </Button>
             <Button
               variant={activeTab === 'manual' ? 'primary' : 'secondary'}
               onClick={() => setActiveTab('manual')}
             >
               <Plus className="size-4" />
-              Option B: Manual PC Entry
+              3. Manual PC Entry
             </Button>
           </div>
-          <Button variant="secondary" onClick={downloadExcelTemplate}>
-            <Download className="size-4" />
-            Download Excel Template
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={downloadCentresTemplate}>
+              <Download className="size-4" />
+              Centres Template
+            </Button>
+            <Button variant="secondary" onClick={downloadExcelTemplate}>
+              <Download className="size-4" />
+              Terminals Template
+            </Button>
+          </div>
         </div>
 
-        {activeTab === 'excel' ? (
+        {activeTab === 'centres' ? (
+          <div className="space-y-4">
+            <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/70 px-6 py-8 text-center transition hover:border-teal-500 hover:bg-teal-50/30">
+              <Upload className="mb-2 size-7 text-teal-700" />
+              <span className="text-sm font-semibold text-ink">
+                Click to upload `.xlsx` or `.csv` Centres Master sheet
+              </span>
+              <span className="mt-1 text-xs text-muted">
+                Columns: Centre Code, Centre Name, State, District, Mandal, Pincode, Address, Total Systems, Buffer Systems
+              </span>
+              <input
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                className="hidden"
+                onChange={(e) => void handleCentreFileUpload(e.target.files?.[0])}
+              />
+            </label>
+
+            {parsedCentres.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-ink">
+                    Live Validation Preview ({parsedCentres.filter((r) => r.valid).length} valid /{' '}
+                    {parsedCentres.length} total)
+                  </p>
+                  <Button
+                    isLoading={isImportingCentres}
+                    disabled={parsedCentres.every((r) => !r.valid)}
+                    onClick={() => void handleBulkSaveCentres()}
+                  >
+                    Import Valid Centres
+                  </Button>
+                </div>
+                <div className="overflow-x-auto rounded-lg border border-border">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-muted">
+                      <tr>
+                        <th className="px-3 py-2">Status</th>
+                        <th className="px-3 py-2">Code</th>
+                        <th className="px-3 py-2">Centre Name</th>
+                        <th className="px-3 py-2">State / District</th>
+                        <th className="px-3 py-2">Mandal / Pincode</th>
+                        <th className="px-3 py-2">Systems</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {parsedCentres.map((row, idx) => (
+                        <tr key={idx} className={row.valid ? 'bg-white' : 'bg-rose-50/70'}>
+                          <td className="px-3 py-2">
+                            {row.valid ? (
+                              <span className="inline-flex items-center gap-1 font-medium text-emerald-700">
+                                <CheckCircle2 className="size-3.5" /> Valid
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 font-medium text-rose-700">
+                                <XCircle className="size-3.5" /> {row.error}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2 font-medium">{row.code}</td>
+                          <td className="px-3 py-2">{row.name}</td>
+                          <td className="px-3 py-2">
+                            {row.state} / {row.district}
+                          </td>
+                          <td className="px-3 py-2">
+                            {row.mandal} ({row.pincode})
+                          </td>
+                          <td className="px-3 py-2">{row.totalSystems}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : activeTab === 'excel' ? (
           <div className="space-y-4">
             <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/70 px-6 py-8 text-center transition hover:border-teal-500 hover:bg-teal-50/30">
               <Upload className="mb-2 size-7 text-teal-700" />
@@ -409,84 +564,7 @@ export function CentresPage() {
         )}
       </Card>
 
-      {/* Auto-Allocate Bar & Registered Terminals Table */}
-      <Card className="space-y-4 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="relative min-w-64 flex-1">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" />
-            <input
-              className="control pl-9"
-              placeholder="Search by Centre, Seat, System ID, IPv4, or MAC..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              className="control w-40"
-              value={examId}
-              onChange={(e) => setExamId(e.target.value)}
-              placeholder="Exam ID"
-            />
-            <Button isLoading={isAssigning} onClick={() => void handleAutoAllocate()}>
-              <Wand2 className="size-4" />
-              Auto-Allocate Seats
-            </Button>
-          </div>
-        </div>
-
-        {allocatedPreview.length > 0 && (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 p-3 text-xs">
-            <p className="mb-1 font-semibold text-emerald-900">Latest Seat Allocations:</p>
-            <div className="flex flex-wrap gap-2">
-              {allocatedPreview.map((a) => (
-                <Badge key={a.rollNo} tone="success">
-                  {a.rollNo} ({a.candidateName}) → {a.seatNumber} [{a.systemId}]
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs text-muted uppercase">
-              <tr>
-                <th className="px-4 py-2.5">Centre</th>
-                <th className="px-4 py-2.5">Seat</th>
-                <th className="px-4 py-2.5">System ID</th>
-                <th className="px-4 py-2.5">IPv4 Address</th>
-                <th className="px-4 py-2.5">MAC Address</th>
-                <th className="px-4 py-2.5">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredTerminals.map((t) => (
-                <tr key={t._id} className="hover:bg-slate-50/60">
-                  <td className="px-4 py-2.5 font-medium">{t.centreCode}</td>
-                  <td className="px-4 py-2.5">{t.seatNumber}</td>
-                  <td className="px-4 py-2.5 font-semibold">{t.systemId}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs">{t.ipv4Address}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs">{t.macAddress}</td>
-                  <td className="px-4 py-2.5">
-                    <Badge
-                      tone={
-                        t.status === 'ONLINE' || t.status === 'IN_EXAM'
-                          ? 'success'
-                          : t.status === 'FAULT'
-                            ? 'danger'
-                            : 'neutral'
-                      }
-                    >
-                      {t.status}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+      <SystemsView />
     </div>
   );
 }

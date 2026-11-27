@@ -63,8 +63,27 @@ export interface StudentAllocationDto {
   centreId?: { code: string; name: string; address: string };
 }
 
+export interface CentrePreferenceDto {
+  priority: number;
+  centreId: string;
+  centreCode: string;
+  centreName: string;
+}
+
 export const centresApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
+    getStudentCentres: build.query<{ centres: CentreDto[] }, void>({
+      query: () => '/student/centres',
+    }),
+    getCentrePreferences: build.query<{ preferences: CentrePreferenceDto[] }, void>({
+      query: () => '/student/centre-preferences',
+    }),
+    saveCentrePreferences: build.mutation<
+      { preferences: CentrePreferenceDto[] },
+      { centreIds: string[] }
+    >({
+      query: (body) => ({ url: '/student/centre-preferences', method: 'PUT', body }),
+    }),
     getMyAllocation: build.query<{ allocation: StudentAllocationDto | null }, void>({
       query: () => '/student/my-allocation',
     }),
@@ -80,6 +99,9 @@ export const centresApi = baseApi.injectEndpoints({
     registerTerminal: build.mutation<{ terminal: TerminalDto }, RegisterTerminalPayload>({
       query: (body) => ({ url: '/terminals/register', method: 'POST', body }),
     }),
+    bulkImportCentres: build.mutation<BulkImportResponse, { rows: Record<string, unknown>[] }>({
+      query: (body) => ({ url: '/centres/bulk-import', method: 'POST', body }),
+    }),
     bulkImportTerminals: build.mutation<BulkImportResponse, { rows: Record<string, unknown>[] }>({
       query: (body) => ({ url: '/terminals/bulk-import', method: 'POST', body }),
     }),
@@ -91,9 +113,13 @@ export const centresApi = baseApi.injectEndpoints({
 
 export const {
   useGetMyAllocationQuery,
+  useGetStudentCentresQuery,
+  useGetCentrePreferencesQuery,
+  useSaveCentrePreferencesMutation,
   useGetCentresQuery,
   useGetTerminalsQuery,
   useRegisterTerminalMutation,
+  useBulkImportCentresMutation,
   useBulkImportTerminalsMutation,
   useAutoAssignSeatsMutation,
 } = centresApi;

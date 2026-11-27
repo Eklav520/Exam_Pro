@@ -163,4 +163,26 @@ export const centreHandlers = [
     ),
   ),
   http.get(url('/student/my-allocation'), () => HttpResponse.json({ allocation })),
+  http.get('/api/v1/student/centres', () =>
+    HttpResponse.json({
+      centres: [
+        { _id: 'cen-a', code: 'CEN-A', name: 'Centre A', city: 'Vijayawada' },
+        { _id: 'cen-b', code: 'CEN-B', name: 'Centre B', city: 'Guntur' },
+        { _id: 'cen-c', code: 'CEN-C', name: 'Centre C', city: 'Tirupati' },
+        { _id: 'cen-d', code: 'CEN-D', name: 'Centre D', city: 'Visakhapatnam' },
+      ],
+    }),
+  ),
+  http.get('/api/v1/student/centre-preferences', () => HttpResponse.json({ preferences: [] })),
+  http.put('/api/v1/student/centre-preferences', async ({ request }) => {
+    const body = (await request.json()) as { centreIds: [string, string, string] };
+    return HttpResponse.json({
+      preferences: body.centreIds.map((id, idx) => ({
+        priority: idx + 1,
+        centreId: id,
+        centreCode: id.toUpperCase(),
+        centreName: id,
+      })),
+    });
+  }),
 ];
