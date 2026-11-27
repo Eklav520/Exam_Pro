@@ -3,6 +3,7 @@ import { attemptReducer, registerAttemptListeners } from '@/features/attempt';
 import { authReducer, registerAuthListeners } from '@/features/auth';
 import { candidateReducer, registerCandidateListeners } from '@/features/candidate';
 import { assignedReducer } from '@/features/evaluation';
+import { mappingReducer } from '@/features/monitoring';
 import { papersReducer, registerPaperListeners } from '@/features/question-papers';
 import { baseApi } from '@/shared/api/baseApi';
 import type { AppStartListening } from './hooks';
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
   attempt: attemptReducer,
   candidate: candidateReducer,
   assigned: assignedReducer,
+  mapping: mappingReducer,
   papers: papersReducer,
 });
 

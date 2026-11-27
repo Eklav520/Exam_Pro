@@ -14,7 +14,7 @@ const menuLinks = () =>
 describe('staff screens', () => {
   it.each([
     [path.adminExams, 'u-admin', 'Examinations'],
-    [path.adminMonitoring, 'u-admin', 'Examination Monitoring'],
+    [path.adminMonitoring, 'u-admin', 'System Mapping'],
     [path.adminAllocation, 'u-admin', 'Allocate Answer Papers'],
     [path.adminReports, 'u-admin', 'Reports'],
     [path.adminQuestionPapers, 'u-setter', 'My Paper Sets'],
@@ -34,8 +34,8 @@ describe('staff screens', () => {
       [
         'Dashboard',
         'Exam Setup',
-        'Exam Monitoring',
         'Centres & Systems',
+        'System Mapping',
         'Evaluator Allocation',
         'Users & Roles',
         'Reports',
@@ -120,11 +120,11 @@ describe('staff screens', () => {
 
   it('applies monitoring filters on Search', async () => {
     const { user } = open(path.adminMonitoring);
-    await user.selectOptions(await screen.findByLabelText('Centre'), 'Centre – B');
+    await user.selectOptions(await screen.findByLabelText('Centre'), 'Centre B – Vijayawada');
     expect(screen.getByText('Diya Patel')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Search' }));
     expect(screen.queryByText('Diya Patel')).not.toBeInTheDocument();
-    expect(screen.getByText('Karan Mehta')).toBeInTheDocument();
+    expect(screen.getByText('Lakshmi Prasanna')).toBeInTheDocument();
   });
 
   it('validates marks, totals the section and moves to the next task', async () => {

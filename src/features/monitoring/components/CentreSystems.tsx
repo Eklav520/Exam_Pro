@@ -2,40 +2,13 @@ import clsx from 'clsx';
 import { Monitor } from 'lucide-react';
 import type { CentreDto, TerminalDto } from '@/features/centres';
 import { Badge } from '@/shared/ui';
+import {
+  shortName,
+  statusOrder as order,
+  terminalStatuses as statuses,
+} from '../model/terminalStatus';
 
 type Status = TerminalDto['status'];
-
-const statuses: Record<Status, { label: string; tile: string; icon: string; dot: string }> = {
-  IN_EXAM: {
-    label: 'In Exam',
-    tile: 'bg-blue-50 border-blue-100',
-    icon: 'text-blue-700',
-    dot: 'bg-blue-100',
-  },
-  ONLINE: {
-    label: 'Online',
-    tile: 'bg-emerald-50 border-emerald-100',
-    icon: 'text-emerald-700',
-    dot: 'bg-emerald-100',
-  },
-  IDLE: {
-    label: 'Idle',
-    tile: 'bg-amber-50 border-amber-100',
-    icon: 'text-amber-700',
-    dot: 'bg-amber-100',
-  },
-  FAULT: {
-    label: 'Fault',
-    tile: 'bg-red-50 border-red-200',
-    icon: 'text-red-600',
-    dot: 'bg-red-100',
-  },
-};
-
-const order: Status[] = ['IN_EXAM', 'ONLINE', 'IDLE', 'FAULT'];
-
-/** "PC-08" from "CEN-D-PC-08". */
-const shortName = (systemId: string) => /PC-\d+$/.exec(systemId)?.[0] ?? systemId;
 
 interface CentreSystemsProps {
   centre: CentreDto;

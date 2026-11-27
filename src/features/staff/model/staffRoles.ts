@@ -44,8 +44,9 @@ export const staffRoles: Record<StaffRole, StaffRoleConfig> = {
     nav: [
       dashboard,
       { to: path.adminExams, label: 'Exam Setup', icon: CalendarDays },
-      { to: path.adminMonitoring, label: 'Exam Monitoring', icon: MonitorCheck },
+      // Centres come first: students are mapped to their computers.
       { to: path.adminCentres, label: 'Centres & Systems', icon: Server },
+      { to: path.adminMonitoring, label: 'System Mapping', icon: MonitorCheck },
       { to: path.adminAllocation, label: 'Evaluator Allocation', icon: UserCheck },
       { to: path.adminUsers, label: 'Users & Roles', icon: Users },
       { to: path.adminReports, label: 'Reports', icon: ChartColumn },
