@@ -6,7 +6,7 @@ export function MonitoringPage() {
     <>
       <PageHeader
         title="System Mapping"
-        description="Map registered candidates to a centre and computer by their centre preferences, then follow their seats live."
+        description="Seat registered candidates at a centre and computer, following their centre preferences."
       />
       <CandidatesView />
     </>

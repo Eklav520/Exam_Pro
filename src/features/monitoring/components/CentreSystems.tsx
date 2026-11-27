@@ -54,7 +54,7 @@ export function CentreSystems({ centre, terminals, headingId }: CentreSystemsPro
       {terminals.length === 0 ? (
         <p className="py-6 text-center text-muted">No computers registered at this centre yet.</p>
       ) : (
-        <ul className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2.5">
+        <ul className="grid min-w-0 grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2.5">
           {sorted.map((terminal) => {
             const status = statuses[terminal.status];
             return (
@@ -98,9 +98,7 @@ export function CentreSystems({ centre, terminals, headingId }: CentreSystemsPro
       {selected && (
         <div className="mt-4 rounded-xl border border-border bg-slate-50 p-4 text-sm">
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="font-bold text-ink">
-              {selected.systemId} — Terminal Details
-            </h3>
+            <h3 className="font-bold text-ink">{selected.systemId} — Terminal Details</h3>
             <button
               type="button"
               aria-label="Close terminal details"

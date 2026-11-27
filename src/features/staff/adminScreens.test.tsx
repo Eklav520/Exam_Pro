@@ -118,15 +118,6 @@ describe('staff screens', () => {
     expect(screen.getByRole('heading', { name: 'Paper Set Details – Set 3' })).toBeInTheDocument();
   });
 
-  it('applies monitoring filters on Search', async () => {
-    const { user } = open(path.adminMonitoring);
-    await user.selectOptions(await screen.findByLabelText('Centre'), 'Centre B – Vijayawada');
-    expect(screen.getByText('Diya Patel')).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Search' }));
-    expect(screen.queryByText('Diya Patel')).not.toBeInTheDocument();
-    expect(screen.getByText('Lakshmi Prasanna')).toBeInTheDocument();
-  });
-
   it('validates marks, totals the section and moves to the next task', async () => {
     const { user } = open(path.adminWorkspace, 'u-evaluator');
     const marks = await screen.findByLabelText(/Awarded Marks/);

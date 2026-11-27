@@ -275,7 +275,7 @@ export function SystemsView() {
           open
           titleId={titleId}
           onClose={() => setOpenId(null)}
-          className="max-h-[85dvh] w-[95vw]! max-w-none! overflow-y-auto backdrop:backdrop-blur-sm lg:w-[75vw]!"
+          className="max-h-[85dvh] w-[95vw]! max-w-none! overflow-x-hidden overflow-y-auto backdrop:backdrop-blur-sm lg:w-[75vw]!"
         >
           <div className="mb-2 flex justify-end">
             <IconButton icon={X} label="Close" onClick={() => setOpenId(null)} />

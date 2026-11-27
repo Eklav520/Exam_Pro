@@ -13,7 +13,7 @@ import { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { SystemsView } from '@/features/monitoring';
 import { useDocumentTitle } from '@/shared/hooks/useDocumentTitle';
-import { Button, Card, PageHeader, StatCard } from '@/shared/ui';
+import { Button, Card, PageHeader, StatCard, Tabs } from '@/shared/ui';
 import {
   useBulkImportCentresMutation,
   useBulkImportTerminalsMutation,
@@ -106,7 +106,13 @@ function downloadExcelTemplate() {
   XLSX.writeFile(workbook, 'ExamPro_Centres_Terminals_Template.xlsx');
 }
 
+const pageTabs = [
+  { id: 'upload', label: 'Upload & Register' },
+  { id: 'centres', label: 'Centres & Systems' },
+] as const;
+
 export function CentresPage() {
+  const [pageTab, setPageTab] = useState<(typeof pageTabs)[number]['id']>('upload');
   useDocumentTitle('Exam Centres');
   const { data: centresData, refetch: refetchCentres } = useGetCentresQuery();
   const { data: terminalsData, refetch: refetchTerminals } = useGetTerminalsQuery();
@@ -141,7 +147,9 @@ export function CentresPage() {
     const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet);
 
     const validated: ParsedCentreRow[] = rawRows.map((row) => {
-      const code = String(row['Centre Code'] ?? row.code ?? '').trim().toUpperCase();
+      const code = String(row['Centre Code'] ?? row.code ?? '')
+        .trim()
+        .toUpperCase();
       const name = String(row['Centre Name'] ?? row.name ?? '').trim();
       const state = String(row.State ?? row.state ?? '').trim();
       const district = String(row.District ?? row.district ?? '').trim();
@@ -282,289 +290,306 @@ export function CentresPage() {
         description="Register lab PCs via bulk Excel upload or manual entry and auto-allocate candidate seats."
       />
 
-      {/* Summary Stat Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total Centres" value={centres.length} icon={Building2} tone="blue" />
-        <StatCard label="Registered Terminals" value={terminals.length} icon={Server} tone="teal" />
-        <StatCard
-          label="Online Terminals"
-          value={terminals.filter((t) => t.status === 'ONLINE' || t.status === 'IN_EXAM').length}
-          icon={Monitor}
-          tone="green"
-        />
-        <StatCard
-          label="Idle / Unassigned PCs"
-          value={terminals.filter((t) => t.status === 'IDLE').length}
-          icon={CheckCircle2}
-          tone="amber"
-        />
-      </div>
-
-      {statusMessage && (
-        <div className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-medium text-teal-900">
-          {statusMessage}
-        </div>
-      )}
-
-      {/* Three Primary Tabs: Centres Excel, Terminals Excel, Manual Entry */}
-      <Card className="p-5">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={activeTab === 'centres' ? 'primary' : 'secondary'}
-              onClick={() => setActiveTab('centres')}
-            >
-              <Building2 className="size-4" />
-              1. Upload Centres Excel
-            </Button>
-            <Button
-              variant={activeTab === 'excel' ? 'primary' : 'secondary'}
-              onClick={() => setActiveTab('excel')}
-            >
-              <FileSpreadsheet className="size-4" />
-              2. Upload Terminals Excel
-            </Button>
-            <Button
-              variant={activeTab === 'manual' ? 'primary' : 'secondary'}
-              onClick={() => setActiveTab('manual')}
-            >
-              <Plus className="size-4" />
-              3. Manual PC Entry
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={downloadCentresTemplate}>
-              <Download className="size-4" />
-              Centres Template
-            </Button>
-            <Button variant="secondary" onClick={downloadExcelTemplate}>
-              <Download className="size-4" />
-              Terminals Template
-            </Button>
-          </div>
-        </div>
-
-        {activeTab === 'centres' ? (
-          <div className="space-y-4">
-            <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/70 px-6 py-8 text-center transition hover:border-teal-500 hover:bg-teal-50/30">
-              <Upload className="mb-2 size-7 text-teal-700" />
-              <span className="text-sm font-semibold text-ink">
-                Click to upload `.xlsx` or `.csv` Centres Master sheet
-              </span>
-              <span className="mt-1 text-xs text-muted">
-                Columns: Centre Code, Centre Name, State, District, Mandal, Pincode, Address, Total Systems, Buffer Systems
-              </span>
-              <input
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                className="hidden"
-                onChange={(e) => void handleCentreFileUpload(e.target.files?.[0])}
-              />
-            </label>
-
-            {parsedCentres.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-ink">
-                    Live Validation Preview ({parsedCentres.filter((r) => r.valid).length} valid /{' '}
-                    {parsedCentres.length} total)
-                  </p>
-                  <Button
-                    isLoading={isImportingCentres}
-                    disabled={parsedCentres.every((r) => !r.valid)}
-                    onClick={() => void handleBulkSaveCentres()}
-                  >
-                    Import Valid Centres
-                  </Button>
-                </div>
-                <div className="overflow-x-auto rounded-lg border border-border">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 text-muted">
-                      <tr>
-                        <th className="px-3 py-2">Status</th>
-                        <th className="px-3 py-2">Code</th>
-                        <th className="px-3 py-2">Centre Name</th>
-                        <th className="px-3 py-2">State / District</th>
-                        <th className="px-3 py-2">Mandal / Pincode</th>
-                        <th className="px-3 py-2">Systems</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {parsedCentres.map((row, idx) => (
-                        <tr key={idx} className={row.valid ? 'bg-white' : 'bg-rose-50/70'}>
-                          <td className="px-3 py-2">
-                            {row.valid ? (
-                              <span className="inline-flex items-center gap-1 font-medium text-emerald-700">
-                                <CheckCircle2 className="size-3.5" /> Valid
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 font-medium text-rose-700">
-                                <XCircle className="size-3.5" /> {row.error}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-3 py-2 font-medium">{row.code}</td>
-                          <td className="px-3 py-2">{row.name}</td>
-                          <td className="px-3 py-2">
-                            {row.state} / {row.district}
-                          </td>
-                          <td className="px-3 py-2">
-                            {row.mandal} ({row.pincode})
-                          </td>
-                          <td className="px-3 py-2">{row.totalSystems}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : activeTab === 'excel' ? (
-          <div className="space-y-4">
-            <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/70 px-6 py-8 text-center transition hover:border-teal-500 hover:bg-teal-50/30">
-              <Upload className="mb-2 size-7 text-teal-700" />
-              <span className="text-sm font-semibold text-ink">
-                Click to upload `.xlsx` or `.csv` terminal sheet
-              </span>
-              <span className="mt-1 text-xs text-muted">
-                Columns: Centre Code, Centre Name, City, Seat Number, System ID, IPv4 Address, MAC
-                Address
-              </span>
-              <input
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                className="hidden"
-                onChange={(e) => void handleFileUpload(e.target.files?.[0])}
-              />
-            </label>
-
-            {parsedRows.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-ink">
-                    Live Validation Preview ({parsedRows.filter((r) => r.valid).length} valid /{' '}
-                    {parsedRows.length} total)
-                  </p>
-                  <Button
-                    isLoading={isImporting}
-                    disabled={parsedRows.every((r) => !r.valid)}
-                    onClick={() => void handleBulkSave()}
-                  >
-                    Import Valid Rows
-                  </Button>
-                </div>
-                <div className="overflow-x-auto rounded-lg border border-border">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 text-muted">
-                      <tr>
-                        <th className="px-3 py-2">Status</th>
-                        <th className="px-3 py-2">Centre</th>
-                        <th className="px-3 py-2">Seat</th>
-                        <th className="px-3 py-2">System ID</th>
-                        <th className="px-3 py-2">IPv4</th>
-                        <th className="px-3 py-2">MAC Address</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {parsedRows.map((row, idx) => (
-                        <tr key={idx} className={row.valid ? 'bg-white' : 'bg-rose-50/70'}>
-                          <td className="px-3 py-2">
-                            {row.valid ? (
-                              <span className="inline-flex items-center gap-1 font-medium text-emerald-700">
-                                <CheckCircle2 className="size-3.5" /> Valid
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 font-medium text-rose-700">
-                                <XCircle className="size-3.5" /> {row.error}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-3 py-2 font-medium">{row.centreCode}</td>
-                          <td className="px-3 py-2">{row.seatNumber}</td>
-                          <td className="px-3 py-2">{row.systemId}</td>
-                          <td className="px-3 py-2 font-mono">{row.ipv4Address}</td>
-                          <td className="px-3 py-2 font-mono">{row.macAddress}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
+      <Tabs label="Centre views" tabs={pageTabs} active={pageTab} onChange={setPageTab}>
+        {pageTab === 'centres' ? (
+          <SystemsView />
         ) : (
-          <form onSubmit={(e) => void handleManualSubmit(e)} className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink">Centre Code</label>
-              <input
-                className="control"
-                value={centreCode}
-                onChange={(e) => setCentreCode(e.target.value.toUpperCase())}
-                placeholder="CEN-A"
-                required
+          <div className="space-y-6">
+            {/* Summary Stat Cards */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard label="Total Centres" value={centres.length} icon={Building2} tone="blue" />
+              <StatCard
+                label="Registered Terminals"
+                value={terminals.length}
+                icon={Server}
+                tone="teal"
+              />
+              <StatCard
+                label="Online Terminals"
+                value={
+                  terminals.filter((t) => t.status === 'ONLINE' || t.status === 'IN_EXAM').length
+                }
+                icon={Monitor}
+                tone="green"
+              />
+              <StatCard
+                label="Idle / Unassigned PCs"
+                value={terminals.filter((t) => t.status === 'IDLE').length}
+                icon={CheckCircle2}
+                tone="amber"
               />
             </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink">Centre Name</label>
-              <input
-                className="control"
-                value={centreName}
-                onChange={(e) => setCentreName(e.target.value)}
-                placeholder="Centre A"
-                required
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink">Seat Number</label>
-              <input
-                className="control"
-                value={seatNumber}
-                onChange={(e) => setSeatNumber(e.target.value.toUpperCase())}
-                placeholder="A-005"
-                required
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink">System ID</label>
-              <input
-                className="control"
-                value={systemId}
-                onChange={(e) => setSystemId(e.target.value.toUpperCase())}
-                placeholder="CEN-A-PC-05"
-                required
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink">IPv4 Address</label>
-              <input
-                className="control font-mono"
-                value={ipv4Address}
-                onChange={(e) => setIpv4Address(e.target.value)}
-                placeholder="192.168.10.15"
-                required
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink">MAC Address</label>
-              <input
-                className="control font-mono"
-                value={macAddress}
-                onChange={(e) => setMacAddress(formatMacInput(e.target.value))}
-                placeholder="00:1B:44:11:3A:B8"
-                required
-              />
-            </div>
-            <div className="sm:col-span-3">
-              <Button type="submit" isLoading={isRegistering}>
-                Register Terminal
-              </Button>
-            </div>
-          </form>
-        )}
-      </Card>
 
-      <SystemsView />
+            {statusMessage && (
+              <div className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-medium text-teal-900">
+                {statusMessage}
+              </div>
+            )}
+
+            {/* Three Primary Tabs: Centres Excel, Terminals Excel, Manual Entry */}
+            <Card className="p-5">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={activeTab === 'centres' ? 'primary' : 'secondary'}
+                    onClick={() => setActiveTab('centres')}
+                  >
+                    <Building2 className="size-4" />
+                    1. Upload Centres Excel
+                  </Button>
+                  <Button
+                    variant={activeTab === 'excel' ? 'primary' : 'secondary'}
+                    onClick={() => setActiveTab('excel')}
+                  >
+                    <FileSpreadsheet className="size-4" />
+                    2. Upload Terminals Excel
+                  </Button>
+                  <Button
+                    variant={activeTab === 'manual' ? 'primary' : 'secondary'}
+                    onClick={() => setActiveTab('manual')}
+                  >
+                    <Plus className="size-4" />
+                    3. Manual PC Entry
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="secondary" onClick={downloadCentresTemplate}>
+                    <Download className="size-4" />
+                    Centres Template
+                  </Button>
+                  <Button variant="secondary" onClick={downloadExcelTemplate}>
+                    <Download className="size-4" />
+                    Terminals Template
+                  </Button>
+                </div>
+              </div>
+
+              {activeTab === 'centres' ? (
+                <div className="space-y-4">
+                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/70 px-6 py-8 text-center transition hover:border-teal-500 hover:bg-teal-50/30">
+                    <Upload className="mb-2 size-7 text-teal-700" />
+                    <span className="text-sm font-semibold text-ink">
+                      Click to upload `.xlsx` or `.csv` Centres Master sheet
+                    </span>
+                    <span className="mt-1 text-xs text-muted">
+                      Columns: Centre Code, Centre Name, State, District, Mandal, Pincode, Address,
+                      Total Systems, Buffer Systems
+                    </span>
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      className="hidden"
+                      onChange={(e) => void handleCentreFileUpload(e.target.files?.[0])}
+                    />
+                  </label>
+
+                  {parsedCentres.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-ink">
+                          Live Validation Preview ({parsedCentres.filter((r) => r.valid).length}{' '}
+                          valid / {parsedCentres.length} total)
+                        </p>
+                        <Button
+                          isLoading={isImportingCentres}
+                          disabled={parsedCentres.every((r) => !r.valid)}
+                          onClick={() => void handleBulkSaveCentres()}
+                        >
+                          Import Valid Centres
+                        </Button>
+                      </div>
+                      <div className="overflow-x-auto rounded-lg border border-border">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-slate-50 text-muted">
+                            <tr>
+                              <th className="px-3 py-2">Status</th>
+                              <th className="px-3 py-2">Code</th>
+                              <th className="px-3 py-2">Centre Name</th>
+                              <th className="px-3 py-2">State / District</th>
+                              <th className="px-3 py-2">Mandal / Pincode</th>
+                              <th className="px-3 py-2">Systems</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border">
+                            {parsedCentres.map((row, idx) => (
+                              <tr key={idx} className={row.valid ? 'bg-white' : 'bg-rose-50/70'}>
+                                <td className="px-3 py-2">
+                                  {row.valid ? (
+                                    <span className="inline-flex items-center gap-1 font-medium text-emerald-700">
+                                      <CheckCircle2 className="size-3.5" /> Valid
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 font-medium text-rose-700">
+                                      <XCircle className="size-3.5" /> {row.error}
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="px-3 py-2 font-medium">{row.code}</td>
+                                <td className="px-3 py-2">{row.name}</td>
+                                <td className="px-3 py-2">
+                                  {row.state} / {row.district}
+                                </td>
+                                <td className="px-3 py-2">
+                                  {row.mandal} ({row.pincode})
+                                </td>
+                                <td className="px-3 py-2">{row.totalSystems}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : activeTab === 'excel' ? (
+                <div className="space-y-4">
+                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/70 px-6 py-8 text-center transition hover:border-teal-500 hover:bg-teal-50/30">
+                    <Upload className="mb-2 size-7 text-teal-700" />
+                    <span className="text-sm font-semibold text-ink">
+                      Click to upload `.xlsx` or `.csv` terminal sheet
+                    </span>
+                    <span className="mt-1 text-xs text-muted">
+                      Columns: Centre Code, Centre Name, City, Seat Number, System ID, IPv4 Address,
+                      MAC Address
+                    </span>
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      className="hidden"
+                      onChange={(e) => void handleFileUpload(e.target.files?.[0])}
+                    />
+                  </label>
+
+                  {parsedRows.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-ink">
+                          Live Validation Preview ({parsedRows.filter((r) => r.valid).length} valid
+                          / {parsedRows.length} total)
+                        </p>
+                        <Button
+                          isLoading={isImporting}
+                          disabled={parsedRows.every((r) => !r.valid)}
+                          onClick={() => void handleBulkSave()}
+                        >
+                          Import Valid Rows
+                        </Button>
+                      </div>
+                      <div className="overflow-x-auto rounded-lg border border-border">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-slate-50 text-muted">
+                            <tr>
+                              <th className="px-3 py-2">Status</th>
+                              <th className="px-3 py-2">Centre</th>
+                              <th className="px-3 py-2">Seat</th>
+                              <th className="px-3 py-2">System ID</th>
+                              <th className="px-3 py-2">IPv4</th>
+                              <th className="px-3 py-2">MAC Address</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border">
+                            {parsedRows.map((row, idx) => (
+                              <tr key={idx} className={row.valid ? 'bg-white' : 'bg-rose-50/70'}>
+                                <td className="px-3 py-2">
+                                  {row.valid ? (
+                                    <span className="inline-flex items-center gap-1 font-medium text-emerald-700">
+                                      <CheckCircle2 className="size-3.5" /> Valid
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 font-medium text-rose-700">
+                                      <XCircle className="size-3.5" /> {row.error}
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="px-3 py-2 font-medium">{row.centreCode}</td>
+                                <td className="px-3 py-2">{row.seatNumber}</td>
+                                <td className="px-3 py-2">{row.systemId}</td>
+                                <td className="px-3 py-2 font-mono">{row.ipv4Address}</td>
+                                <td className="px-3 py-2 font-mono">{row.macAddress}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => void handleManualSubmit(e)}
+                  className="grid gap-4 sm:grid-cols-3"
+                >
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-ink">Centre Code</label>
+                    <input
+                      className="control"
+                      value={centreCode}
+                      onChange={(e) => setCentreCode(e.target.value.toUpperCase())}
+                      placeholder="CEN-A"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-ink">Centre Name</label>
+                    <input
+                      className="control"
+                      value={centreName}
+                      onChange={(e) => setCentreName(e.target.value)}
+                      placeholder="Centre A"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-ink">Seat Number</label>
+                    <input
+                      className="control"
+                      value={seatNumber}
+                      onChange={(e) => setSeatNumber(e.target.value.toUpperCase())}
+                      placeholder="A-005"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-ink">System ID</label>
+                    <input
+                      className="control"
+                      value={systemId}
+                      onChange={(e) => setSystemId(e.target.value.toUpperCase())}
+                      placeholder="CEN-A-PC-05"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-ink">IPv4 Address</label>
+                    <input
+                      className="control font-mono"
+                      value={ipv4Address}
+                      onChange={(e) => setIpv4Address(e.target.value)}
+                      placeholder="192.168.10.15"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-ink">MAC Address</label>
+                    <input
+                      className="control font-mono"
+                      value={macAddress}
+                      onChange={(e) => setMacAddress(formatMacInput(e.target.value))}
+                      placeholder="00:1B:44:11:3A:B8"
+                      required
+                    />
+                  </div>
+                  <div className="sm:col-span-3">
+                    <Button type="submit" isLoading={isRegistering}>
+                      Register Terminal
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </Card>
+          </div>
+        )}
+      </Tabs>
     </div>
   );
 }
