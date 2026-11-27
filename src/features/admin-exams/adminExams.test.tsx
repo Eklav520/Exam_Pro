@@ -106,13 +106,13 @@ describe('managing exams', () => {
     expect(screen.getByText(/2 sections · 23 questions/)).toBeInTheDocument();
   });
 
-  it('shows each exam’s sections in the list', async () => {
+  it('lists each exam with its date and totals from the pattern', async () => {
     renderApp({ route: '/admin/exams', as: 'u-admin' });
     const row = await screen.findByRole('row', { name: /APPSC Computer Proficiency Test/ });
-    expect(row).toHaveTextContent(
-      'Part B: MS Word Practical × 1, MS Excel Practical × 1, MS PowerPoint Practical × 1',
-    );
     expect(row).toHaveTextContent('12 Mar 2026');
+    // 20 MCQs + 3 practical tasks, 100 marks.
+    expect(row).toHaveTextContent(/23\s*100/);
+    expect(screen.queryByRole('columnheader', { name: 'Sections' })).not.toBeInTheDocument();
   });
 
   it('checks the details before moving on', async () => {

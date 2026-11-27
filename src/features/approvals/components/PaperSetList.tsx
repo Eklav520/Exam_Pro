@@ -29,6 +29,10 @@ export function PaperSetList({ sets, selectedId, onSelect }: PaperSetListProps) 
               >
                 <span>
                   <span className="block font-semibold">{set.name}</span>
+                  <span className="block text-sm">{set.exam}</span>
+                  {set.setter && (
+                    <span className="block text-sm text-muted">By {set.setter.name}</span>
+                  )}
                   <span className="block text-sm text-muted">Submitted on: {set.submittedOn}</span>
                 </span>
                 <PaperStatusBadge status={set.status} />

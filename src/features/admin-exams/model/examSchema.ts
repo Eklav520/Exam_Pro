@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { practicalApps } from '@/features/question-papers';
 import type { ExamInput } from '@/shared/types';
-import { isObjective, sectionTypeIds } from './sectionTypes';
+import { isObjective, sectionTypeIds } from '@/shared/lib/examPattern';
 
 const number = (message: string) => z.number({ error: message });
 const marks = number('Enter the marks').positive('Marks must be more than 0');

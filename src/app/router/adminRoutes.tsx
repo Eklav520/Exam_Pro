@@ -58,6 +58,12 @@ export const adminRoutes: RouteObject[] = [
             }),
           },
           {
+            path: path.adminExamSets,
+            lazy: async () => ({
+              Component: (await import('@/features/admin-exams/pages/ExamSetsPage')).ExamSetsPage,
+            }),
+          },
+          {
             path: path.adminCentres,
             lazy: async () => ({
               Component: (await import('@/features/centres/pages/CentresPage')).CentresPage,
@@ -96,13 +102,6 @@ export const adminRoutes: RouteObject[] = [
             lazy: async () => ({
               Component: (await import('@/features/question-papers/pages/QuestionPapersPage'))
                 .QuestionPapersPage,
-            }),
-          },
-          {
-            path: path.adminPaperNew,
-            lazy: async () => ({
-              Component: (await import('@/features/question-papers/pages/CreatePaperPage'))
-                .CreatePaperPage,
             }),
           },
           {

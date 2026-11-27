@@ -1,7 +1,7 @@
 import type { PaperSet } from './paper';
 
 // Bump the version when PaperSet changes shape.
-const STORAGE_KEY = 'exam-pro.papers.v2';
+const STORAGE_KEY = 'exam-pro.papers.v4';
 
 /** Stands in for the server until question papers are connected; this browser only. */
 export function loadPapers(): PaperSet[] | null {

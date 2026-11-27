@@ -15,7 +15,7 @@ import {
   sectionTypeIds,
   sectionTypes,
   type Marking,
-} from '../model/sectionTypes';
+} from '@/shared/lib/examPattern';
 
 const markings: Record<Marking, { label: string; tone: 'info' | 'violet' | 'warning' }> = {
   auto: { label: 'Marked automatically', tone: 'info' },

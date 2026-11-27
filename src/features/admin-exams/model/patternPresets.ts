@@ -1,6 +1,6 @@
 import { nanoid } from '@reduxjs/toolkit';
 import type { ExamSection, QuestionGroup, SectionType } from '@/shared/types';
-import { partName, sectionTypes, type SectionGroup } from './sectionTypes';
+import { partName, sectionTypes, type SectionGroup } from '@/shared/lib/examPattern';
 
 type Group = [type: SectionType, count: number, marks: number, negative?: number];
 type Section = [title: string, groups: Group[]];

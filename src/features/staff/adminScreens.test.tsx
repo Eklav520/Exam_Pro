@@ -92,18 +92,19 @@ describe('staff screens', () => {
     expect(
       await screen.findByText('Review sealed Set 2 – APPSC Computer Proficiency Test'),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Prepared by Priya Sharma/)).toBeInTheDocument();
+    expect(screen.getByText(/Prepared by Manoj Jain/)).toBeInTheDocument();
   });
 
   it('filters paper sets', async () => {
     const { user } = open(path.adminQuestionPapers, 'u-setter');
+    // Priya's two drafts: CPT Set 1 and Group-II Set 1.
     await user.selectOptions(await screen.findByLabelText('Status'), 'Draft');
     expect(screen.getAllByRole('row')).toHaveLength(3);
-    await user.type(screen.getByLabelText('Search paper set'), 'set 4');
+    await user.type(screen.getByLabelText('Search paper set'), 'screening');
     expect(screen.getAllByRole('row')).toHaveLength(2);
     await user.selectOptions(
       screen.getByLabelText('Examination'),
-      'APPSC Group-II Services – Screening Test',
+      'APPSC Computer Proficiency Test',
     );
     expect(screen.getByText('No paper sets match these filters.')).toBeInTheDocument();
   });

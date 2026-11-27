@@ -2,7 +2,7 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { formatDate } from '@/shared/lib/format';
 import { Badge, Card } from '@/shared/ui';
 import type { ExamFormValues } from '../model/examSchema';
-import { getPatternTotals, groupMarks, isObjective, sectionTypes } from '../model/sectionTypes';
+import { getPatternTotals, groupMarks, isObjective, sectionTypes } from '@/shared/lib/examPattern';
 
 export function ReviewStep() {
   const { control } = useFormContext<ExamFormValues>();

@@ -1,6 +1,8 @@
-import { CalendarCheck, FilePen, Pencil, Plus, Search, Trash2, Layers } from 'lucide-react';
+import { CalendarCheck, FilePen, Files, Pencil, Plus, Search, Trash2, Layers } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAppSelector } from '@/app/hooks';
+import { isSetOfExam, selectPapers } from '@/features/question-papers';
 import { getErrorMessage } from '@/shared/api/getErrorMessage';
 import { path, to } from '@/shared/config/paths';
 import { formatDate, formatDuration } from '@/shared/lib/format';
@@ -22,7 +24,7 @@ import {
   type Column,
 } from '@/shared/ui';
 import { useDeleteExamMutation, useGetAdminExamsQuery } from '../api/adminExamsApi';
-import { getPatternTotals, sectionTypes } from '../model/sectionTypes';
+import { getPatternTotals } from '@/shared/lib/examPattern';
 
 /** Exams made before patterns have no sections; their totals come from their questions. */
 function getTotals(exam: ExamSummary) {
@@ -38,6 +40,7 @@ export function AdminExamListPage() {
   const navigate = useNavigate();
   const { data: exams, error, refetch } = useGetAdminExamsQuery();
   const [deleteExam, deletion] = useDeleteExamMutation();
+  const papers = useAppSelector(selectPapers);
   const [target, setTarget] = useState<ExamSummary | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState(ALL);
@@ -60,7 +63,8 @@ export function AdminExamListPage() {
     {
       header: 'Exam',
       cell: (exam) => (
-        <span>
+        // Long titles wrap, so the table fits without scrolling sideways.
+        <span className="block max-w-xs min-w-48 whitespace-normal">
           <span className="block font-semibold">{exam.title}</span>
           <span className="text-sm text-muted">{exam.subject}</span>
           {exam.notificationNo && (
@@ -73,26 +77,25 @@ export function AdminExamListPage() {
       header: 'Exam Date',
       cell: (exam) => (exam.examDate ? formatDate(exam.examDate) : '–'),
     },
-    {
-      header: 'Sections',
-      cell: (exam) =>
-        exam.sections?.length ? (
-          <ul className="space-y-0.5 text-sm">
-            {exam.sections.map((section) => (
-              <li key={section.id}>
-                <span className="font-semibold">{section.name}:</span>{' '}
-                {section.groups
-                  .map((group) => `${sectionTypes[group.type].label} × ${group.questionCount}`)
-                  .join(', ')}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <span className="text-muted">Not set</span>
-        ),
-    },
     { header: 'Questions', align: 'center', cell: (exam) => getTotals(exam).questions },
     { header: 'Total Marks', align: 'center', cell: (exam) => getTotals(exam).marks },
+    {
+      header: 'Paper Sets',
+      align: 'center',
+      cell: (exam) => {
+        const count = papers.filter((paper) => isSetOfExam(paper, exam)).length;
+        return (
+          <Link
+            to={to.adminExamSets(exam.id)}
+            aria-label={`Paper sets for ${exam.title}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1 text-sm font-semibold whitespace-nowrap text-blue-700 hover:bg-canvas"
+          >
+            <Files aria-hidden className="size-4" />
+            {count === 0 ? 'Assign' : `${count} ${count === 1 ? 'set' : 'sets'}`}
+          </Link>
+        );
+      },
+    },
     { header: 'Duration', cell: (exam) => formatDuration(exam.durationMinutes) },
     { header: 'Pass Mark', align: 'center', cell: (exam) => `${exam.passPercentage}%` },
     {
@@ -182,6 +185,7 @@ export function AdminExamListPage() {
                 />
               </FilterBar>
               <DataTable
+                dense
                 caption="Exams"
                 columns={columns}
                 rows={rows}

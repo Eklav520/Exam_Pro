@@ -1,10 +1,10 @@
-import { CircleCheck, FilePen, FileText, Hourglass, Plus, Undo2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { CircleCheck, FilePen, FileText, Hourglass, Undo2 } from 'lucide-react';
 import { useAppSelector } from '@/app/hooks';
 import { useCurrentUser } from '@/features/auth';
 import { isOwnPaper, selectPapers } from '@/features/question-papers';
-import { path, to } from '@/shared/config/paths';
-import { buttonClass, StatCard } from '@/shared/ui';
+import { to } from '@/shared/config/paths';
+import { formatDate } from '@/shared/lib/format';
+import { StatCard } from '@/shared/ui';
 import { DashboardHeader } from './DashboardHeader';
 import { TaskList, type Task } from './TaskList';
 
@@ -22,16 +22,18 @@ export function SetterDashboard() {
         ? {
             id: paper.id,
             icon: Undo2,
-            title: `${paper.name} was returned for changes`,
-            detail: `${paper.exam}. Remarks: ${paper.remarks}`,
+            title: `${paper.name} of ${paper.exam} was returned for changes`,
+            detail: `Remarks: ${paper.remarks}`,
             to: to.adminPaperEdit(paper.id),
             action: 'Make Changes',
           }
         : {
             id: paper.id,
             icon: FilePen,
-            title: `Finish ${paper.name} and send it for approval`,
-            detail: `${paper.exam}. Last updated ${paper.updatedAt}.`,
+            title: `Prepare ${paper.name} of ${paper.exam}`,
+            detail: paper.dueDate
+              ? `Send it for approval by ${formatDate(paper.dueDate)}.`
+              : `Last updated ${paper.updatedAt}.`,
             to: to.adminPaperEdit(paper.id),
             action: 'Continue',
           },
@@ -39,15 +41,7 @@ export function SetterDashboard() {
 
   return (
     <>
-      <DashboardHeader
-        description="Prepare paper sets in the pattern the Admin set for each examination, then send them to the Higher Official."
-        actions={
-          <Link to={path.adminPaperNew} className={buttonClass()}>
-            <Plus aria-hidden className="size-4" />
-            Create Paper Set
-          </Link>
-        }
-      />
+      <DashboardHeader description="Prepare the paper sets the Admin assigned to you, in each exam's pattern, then send them to the Higher Official." />
       <dl className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={FileText} tone="blue" value={papers.length} label="My Paper Sets" />
         <StatCard icon={FilePen} tone="amber" value={count('draft')} label="Drafts" />

@@ -5,6 +5,9 @@ export interface CentreDto {
   code: string;
   name: string;
   city: string;
+  /** Where the centre sits in the hierarchy: state, then district. */
+  state?: string;
+  district?: string;
   address?: string;
   terminalCount?: number;
 }

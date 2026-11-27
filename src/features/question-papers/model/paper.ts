@@ -1,5 +1,5 @@
 import { nanoid } from '@reduxjs/toolkit';
-import type { PracticalApp, PracticalTask } from '@/shared/types';
+import type { ExamSection, PracticalApp, PracticalTask } from '@/shared/types';
 
 export type PaperStatus = 'draft' | 'under_review' | 'approved';
 
@@ -39,7 +39,34 @@ export interface PaperSet {
   remarks: string;
   /** Absent on sets saved before setters were tracked; every setter sees those. */
   setter?: PaperSetter;
+  /** Set when the Admin assigned this set from an exam; it then stays with that exam. */
+  examId?: string;
+  /** Copy of the exam's pattern when assigned, so the setter knows what to prepare. */
+  pattern?: ExamSection[];
+  /** yyyy-mm-dd, or empty for no deadline. */
+  dueDate?: string;
+  assignedOn?: string;
 }
+
+/** A set the Admin assigned to a setter: same pattern as the exam, empty until prepared. */
+export function createAssignedSet(input: {
+  exam: { id: string; title: string; sections: ExamSection[] };
+  name: string;
+  setter: PaperSetter;
+  dueDate: string;
+}): PaperSet {
+  const { exam, name, setter, dueDate } = input;
+  return {
+    ...createPaper(exam.title, name, setter),
+    examId: exam.id,
+    pattern: structuredClone(exam.sections),
+    dueDate,
+  };
+}
+
+/** Sets of an exam, matched by id when assigned, otherwise by title. */
+export const isSetOfExam = (paper: PaperSet, exam: { id: string; title: string }) =>
+  paper.examId === undefined ? paper.exam === exam.title : paper.examId === exam.id;
 
 /** Each setter works on their own sets only. */
 export const isOwnPaper = (paper: PaperSet, setterId: string) =>

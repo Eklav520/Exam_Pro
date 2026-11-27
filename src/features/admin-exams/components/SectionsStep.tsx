@@ -4,7 +4,7 @@ import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { Button, Card, ConfirmDialog, SelectField } from '@/shared/ui';
 import type { ExamFormValues } from '../model/examSchema';
 import { buildPreset, createSection, presetOptions } from '../model/patternPresets';
-import { getPatternTotals } from '../model/sectionTypes';
+import { getPatternTotals } from '@/shared/lib/examPattern';
 import { SectionCard } from './SectionCard';
 
 /** The exam's pattern: any number of parts, each with one or more question types. */

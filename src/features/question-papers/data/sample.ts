@@ -78,9 +78,29 @@ const tasks: PracticalItem[] = [
   },
 ];
 
-const priya: PaperSetter = { id: 'u-setter', name: 'Priya Sharma' };
-const manoj: PaperSetter = { id: 'u-setter-2', name: 'Manoj Jain' };
+/** Staff with the Question Paper Setter role, who the Admin can assign sets to. */
+export const paperSetters: PaperSetter[] = [
+  { id: 'u-setter', name: 'Priya Sharma' },
+  { id: 'u-setter-2', name: 'Manoj Jain' },
+  { id: 'u-setter-3', name: 'Anita Desai' },
+  { id: 'u-setter-4', name: 'Vikram Singh' },
+  { id: 'u-setter-5', name: 'Lakshmi Pillai' },
+  { id: 'u-setter-6', name: 'Rohan Das' },
+  { id: 'u-setter-7', name: 'Sneha Kulkarni' },
+  { id: 'u-setter-8', name: 'Divya Reddy' },
+];
 
+const [priya, manoj, anita, vikram] = paperSetters as [
+  PaperSetter,
+  PaperSetter,
+  PaperSetter,
+  PaperSetter,
+];
+
+/** The exam these sample sets belong to; see the mock seed. */
+const SAMPLE_EXAM_ID = 'computer-proficiency-test';
+
+// Each set of an exam goes to a different setter, so no one knows two papers.
 const set = (
   number: number,
   status: PaperStatus,
@@ -95,15 +115,36 @@ const set = (
   status,
   mcqs,
   tasks,
-  submittedOn: `${day} Mar 2026`,
+  // Drafts were never sent; the others were.
+  submittedOn: status === 'draft' ? null : `${day} Mar 2026`,
   updatedAt: `${day} Mar 2026, ${time}`,
   remarks: '',
   setter,
+  examId: SAMPLE_EXAM_ID,
+  assignedOn: '2 Mar 2026',
+  dueDate: '2026-03-10',
 });
 
 export const samplePapers: PaperSet[] = [
   set(1, 'draft', 12, '10:24 AM', priya),
-  set(2, 'under_review', 12, '11:18 AM', priya),
-  set(3, 'approved', 11, '04:32 PM', manoj),
-  set(4, 'draft', 10, '09:15 AM', priya),
+  set(2, 'under_review', 12, '11:18 AM', manoj),
+  set(3, 'approved', 11, '04:32 PM', anita),
+  set(4, 'draft', 10, '09:15 AM', vikram),
+  // Assigned to Priya, not started yet.
+  {
+    id: 'g2-set-1',
+    name: 'Set 1',
+    exam: 'APPSC Group-II Services – Screening Test',
+    title: 'APPSC Group-II Services – Screening Test – Set 1',
+    status: 'draft',
+    mcqs: [],
+    tasks: [],
+    submittedOn: null,
+    updatedAt: '20 Nov 2026, 10:00 AM',
+    remarks: '',
+    setter: priya,
+    examId: 'group2-screening',
+    assignedOn: '20 Nov 2026',
+    dueDate: '2026-12-15',
+  },
 ];

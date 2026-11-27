@@ -1,23 +1,21 @@
-import { Copy, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { Pencil, Search } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '@/app/hooks';
 import { useCurrentUser } from '@/features/auth';
-import { path, to } from '@/shared/config/paths';
+import { to } from '@/shared/config/paths';
+import { formatDate } from '@/shared/lib/format';
 import {
   Badge,
-  buttonClass,
-  ConfirmDialog,
   DataTable,
+  EmptyState,
   FilterBar,
   IconButton,
   PageHeader,
   SelectField,
-  useToast,
   type Column,
 } from '@/shared/ui';
 import { PaperStatusBadge } from '../components/PaperStatusBadge';
-import { SAMPLE_EXAM, sampleExams } from '../data/sample';
 import {
   getPaperTotals,
   getPaperType,
@@ -25,7 +23,7 @@ import {
   paperTypes,
   type PaperSet,
 } from '../model/paper';
-import { paperDeleted, paperDuplicated, selectPapers } from '../model/papersSlice';
+import { selectPapers } from '../model/papersSlice';
 
 const ALL = 'all';
 
@@ -36,22 +34,24 @@ const statusOptions = [
   { value: 'approved', label: 'Approved' },
 ];
 
+/** The sets the Admin assigned to the signed-in setter. Setters cannot create their own. */
 export function QuestionPapersPage() {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const toast = useToast();
   const userId = useCurrentUser()?.id ?? '';
   const papers = useAppSelector(selectPapers).filter((paper) => isOwnPaper(paper, userId));
-  const [exam, setExam] = useState(SAMPLE_EXAM);
+  const [exam, setExam] = useState(ALL);
   const [type, setType] = useState(ALL);
   const [status, setStatus] = useState(ALL);
   const [search, setSearch] = useState('');
-  const [deleting, setDeleting] = useState<PaperSet | null>(null);
 
+  const examOptions = [
+    { value: ALL, label: 'All Examinations' },
+    ...new Set(papers.map((paper) => paper.exam)),
+  ];
   const term = search.trim().toLowerCase();
   const rows = papers.filter(
     (paper) =>
-      paper.exam === exam &&
+      (exam === ALL || paper.exam === exam) &&
       (type === ALL || getPaperType(paper) === type) &&
       (status === ALL || paper.status === status) &&
       `${paper.name} ${paper.title}`.toLowerCase().includes(term),
@@ -59,13 +59,22 @@ export function QuestionPapersPage() {
 
   const columns: Column<PaperSet>[] = [
     { header: 'Set', cell: (paper) => <Badge tone="info">{paper.name}</Badge> },
-    { header: 'Paper Title', cell: (paper) => <span className="font-medium">{paper.title}</span> },
     {
-      header: 'Total Questions',
+      header: 'Paper Title',
+      cell: (paper) => (
+        <span className="block max-w-xs min-w-48 whitespace-normal">
+          <span className="block font-medium">{paper.title}</span>
+          <span className="text-sm text-muted">{paper.exam}</span>
+        </span>
+      ),
+    },
+    {
+      header: 'Questions',
       align: 'center',
       cell: (paper) => getPaperTotals(paper).questions,
     },
-    { header: 'Total Marks', align: 'center', cell: (paper) => getPaperTotals(paper).marks },
+    { header: 'Marks', align: 'center', cell: (paper) => getPaperTotals(paper).marks },
+    { header: 'Due Date', cell: (paper) => (paper.dueDate ? formatDate(paper.dueDate) : '–') },
     {
       header: 'Status',
       align: 'center',
@@ -73,33 +82,16 @@ export function QuestionPapersPage() {
     },
     { header: 'Last Updated', cell: (paper) => paper.updatedAt },
     {
-      header: 'Actions',
+      header: 'Action',
       align: 'center',
       cell: (paper) => (
-        <span className="inline-flex gap-1">
-          <IconButton
-            icon={Pencil}
-            // Reviewed content must not change behind the reviewer's back.
-            disabled={paper.status !== 'draft'}
-            label={`Edit ${paper.name}`}
-            onClick={() => void navigate(to.adminPaperEdit(paper.id))}
-          />
-          <IconButton
-            icon={Copy}
-            label={`Duplicate ${paper.name}`}
-            onClick={() => {
-              dispatch(paperDuplicated(paper.id));
-              toast(`${paper.name} is copied to a new draft.`);
-            }}
-          />
-          <IconButton
-            icon={Trash2}
-            danger
-            disabled={paper.status !== 'draft'}
-            label={`Delete ${paper.name}`}
-            onClick={() => setDeleting(paper)}
-          />
-        </span>
+        <IconButton
+          icon={Pencil}
+          // Reviewed content must not change behind the reviewer's back.
+          disabled={paper.status !== 'draft'}
+          label={`Edit ${paper.title}`}
+          onClick={() => void navigate(to.adminPaperEdit(paper.id))}
+        />
       ),
     },
   ];
@@ -108,74 +100,61 @@ export function QuestionPapersPage() {
     <>
       <PageHeader
         title="My Paper Sets"
-        description="Prepare paper sets in the exam pattern set by the Admin and send them to the Higher Official for approval."
-        actions={
-          <Link to={path.adminPaperNew} className={buttonClass()}>
-            <Plus aria-hidden className="size-4" />
-            Create Paper Set
-          </Link>
-        }
+        description="The sets the Admin assigned to you. Prepare each in its exam's pattern and send it to the Higher Official for approval."
       />
-      <FilterBar label="Filter paper sets">
-        <SelectField
-          label="Examination"
-          value={exam}
-          options={sampleExams}
-          onChange={setExam}
-          className="flex-1 sm:min-w-56"
-        />
-        <SelectField
-          label="Paper Type"
-          value={type}
-          options={[{ value: ALL, label: 'All Types' }, ...paperTypes]}
-          onChange={setType}
-          className="flex-1"
-        />
-        <SelectField
-          label="Status"
-          value={status}
-          options={statusOptions}
-          onChange={setStatus}
-          className="flex-1"
-        />
-        <div className="relative min-w-48 flex-1">
-          <input
-            type="search"
-            aria-label="Search paper set"
-            placeholder="Search paper set..."
-            className="control pr-9"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
+      {papers.length === 0 ? (
+        <EmptyState title="No paper sets are assigned to you yet">
+          The Admin assigns sets from Exam Setup. They appear here when assigned.
+        </EmptyState>
+      ) : (
+        <>
+          <FilterBar label="Filter paper sets">
+            <SelectField
+              label="Examination"
+              value={exam}
+              options={examOptions}
+              onChange={setExam}
+              className="flex-1 sm:min-w-56"
+            />
+            <SelectField
+              label="Paper Type"
+              value={type}
+              options={[{ value: ALL, label: 'All Types' }, ...paperTypes]}
+              onChange={setType}
+              className="flex-1"
+            />
+            <SelectField
+              label="Status"
+              value={status}
+              options={statusOptions}
+              onChange={setStatus}
+              className="flex-1"
+            />
+            <div className="relative min-w-48 flex-1">
+              <input
+                type="search"
+                aria-label="Search paper set"
+                placeholder="Search paper set..."
+                className="control pr-9"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+              <Search
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
+              />
+            </div>
+          </FilterBar>
+          <DataTable
+            dense
+            caption="Paper sets"
+            columns={columns}
+            rows={rows}
+            getRowKey={(paper) => paper.id}
+            emptyMessage="No paper sets match these filters."
           />
-          <Search
-            aria-hidden
-            className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
-          />
-        </div>
-      </FilterBar>
-      <DataTable
-        caption="Paper sets"
-        columns={columns}
-        rows={rows}
-        getRowKey={(paper) => paper.id}
-        emptyMessage="No paper sets match these filters."
-      />
-      <ConfirmDialog
-        open={deleting !== null}
-        title={`Delete ${deleting?.name ?? ''}?`}
-        confirmLabel="Delete"
-        danger
-        onCancel={() => setDeleting(null)}
-        onConfirm={() => {
-          if (deleting) {
-            dispatch(paperDeleted(deleting.id));
-            toast(`${deleting.name} is deleted.`);
-          }
-          setDeleting(null);
-        }}
-      >
-        {deleting?.title} and its questions will be removed.
-      </ConfirmDialog>
+        </>
+      )}
     </>
   );
 }
