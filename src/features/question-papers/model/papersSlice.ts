@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { samplePapers } from '../data/sample';
-import { formatDay, formatStamp, type PaperSet } from './paper';
+import { countItems, formatDay, formatStamp, type PaperSet } from './paper';
 import { loadPapers } from './paperStorage';
 
 interface PapersState {
@@ -37,10 +37,7 @@ const papersSlice = createSlice({
     /** Takes back a set the setter has not started; once work exists it stays. */
     assignmentRemoved(state, { payload }: PayloadAction<string>) {
       state.papers = state.papers.filter(
-        (paper) =>
-          paper.id !== payload ||
-          paper.status !== 'draft' ||
-          paper.mcqs.length + paper.tasks.length > 0,
+        (paper) => paper.id !== payload || paper.status !== 'draft' || countItems(paper) > 0,
       );
     },
     /** Adds the set, or replaces the draft with the same id. */

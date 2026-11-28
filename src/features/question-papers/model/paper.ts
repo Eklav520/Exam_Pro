@@ -1,5 +1,12 @@
 import { nanoid } from '@reduxjs/toolkit';
-import type { ExamSection, PracticalApp, PracticalTask } from '@/shared/types';
+import { isObjective, sectionTypes } from '@/shared/lib/examPattern';
+import type {
+  ExamSection,
+  PracticalApp,
+  PracticalTask,
+  QuestionGroup,
+  SectionType,
+} from '@/shared/types';
 
 export type PaperStatus = 'draft' | 'under_review' | 'approved';
 
@@ -18,6 +25,33 @@ export const practicalApps = [
 ] as const satisfies readonly PracticalApp[];
 export type PracticalItem = PracticalTask;
 
+/** A pair of "Match the Following"; the right side is listed shuffled to candidates. */
+export interface MatchPair {
+  left: string;
+  right: string;
+}
+
+/**
+ * A question written for one slot of the exam's pattern. Its marks come from the pattern.
+ * Which fields are used depends on the type.
+ */
+export interface PatternQuestion {
+  id: string;
+  /** The pattern group this fills. */
+  groupId: string;
+  type: SectionType;
+  /** The question, the statement, the sentence with a blank, or the practical task title. */
+  text: string;
+  /** MCQ choices. */
+  options?: string[];
+  correctIndex?: number;
+  /** "True"/"False", the missing word(s), or a model answer for written questions. */
+  answer?: string;
+  pairs?: MatchPair[];
+  /** What the candidate must do in a practical task. */
+  instructions?: string;
+}
+
 /** The paper setter who prepares a set. */
 export interface PaperSetter {
   id: string;
@@ -32,6 +66,8 @@ export interface PaperSet {
   status: PaperStatus;
   mcqs: McqItem[];
   tasks: PracticalItem[];
+  /** Questions written for the pattern, when the set has one. */
+  questions?: PatternQuestion[];
   /** Null until first sent for approval. */
   submittedOn: string | null;
   updatedAt: string;
@@ -74,7 +110,53 @@ export const isOwnPaper = (paper: PaperSet, setterId: string) =>
 
 const sumMarks = (items: { marks: number }[]) => items.reduce((sum, item) => sum + item.marks, 0);
 
-export function getPaperTotals({ mcqs, tasks }: Pick<PaperSet, 'mcqs' | 'tasks'>) {
+type QuestionFields = Pick<PaperSet, 'mcqs' | 'tasks' | 'questions' | 'pattern'>;
+
+/** A set prepared against the exam's pattern, rather than free MCQs and tasks. */
+export const usesPattern = (paper: Pick<PaperSet, 'pattern'>) => (paper.pattern ?? []).length > 0;
+
+/** One slot of the pattern with the questions written for it so far. */
+export interface GroupProgress {
+  section: ExamSection;
+  group: QuestionGroup;
+  questions: PatternQuestion[];
+  /** Questions still to write; never below 0. */
+  missing: number;
+}
+
+export function getPatternProgress(paper: Pick<PaperSet, 'questions' | 'pattern'>) {
+  const questions = paper.questions ?? [];
+  return (paper.pattern ?? []).flatMap((section) =>
+    section.groups.map((group): GroupProgress => {
+      const written = questions.filter((question) => question.groupId === group.id);
+      return {
+        section,
+        group,
+        questions: written,
+        missing: Math.max(0, group.questionCount - written.length),
+      };
+    }),
+  );
+}
+
+/** Questions and tasks written, whatever kind of set. */
+export const countItems = (paper: Pick<PaperSet, 'mcqs' | 'tasks' | 'questions'>) =>
+  paper.mcqs.length + paper.tasks.length + (paper.questions ?? []).length;
+
+export function getPaperTotals(paper: QuestionFields) {
+  if (usesPattern(paper)) {
+    const progress = getPatternProgress(paper);
+    const marksOf = (rows: GroupProgress[]) =>
+      rows.reduce((sum, row) => sum + row.questions.length * (row.group.marksPerQuestion || 0), 0);
+    const isPractical = (row: GroupProgress) => sectionTypes[row.group.type].group === 'Practical';
+    return {
+      mcqMarks: marksOf(progress.filter((row) => !isPractical(row))),
+      taskMarks: marksOf(progress.filter(isPractical)),
+      questions: progress.reduce((sum, row) => sum + row.questions.length, 0),
+      marks: marksOf(progress),
+    };
+  }
+  const { mcqs, tasks } = paper;
   const mcqMarks = sumMarks(mcqs);
   const taskMarks = sumMarks(tasks);
   return {
@@ -87,21 +169,45 @@ export function getPaperTotals({ mcqs, tasks }: Pick<PaperSet, 'mcqs' | 'tasks'>
 
 export const paperTypes = ['MCQ', 'Practical', 'MCQ + Practical'] as const;
 
-export function getPaperType({ mcqs, tasks }: Pick<PaperSet, 'mcqs' | 'tasks'>) {
+export function getPaperType(paper: Pick<PaperSet, 'mcqs' | 'tasks' | 'pattern'>) {
+  if (usesPattern(paper)) {
+    const types = (paper.pattern ?? []).flatMap((section) => section.groups.map((g) => g.type));
+    const practical = types.filter((type) => sectionTypes[type].group === 'Practical').length;
+    if (practical === 0) return 'MCQ';
+    return practical === types.length ? 'Practical' : 'MCQ + Practical';
+  }
+  const { mcqs, tasks } = paper;
   if (mcqs.length > 0 && tasks.length === 0) return 'MCQ';
   if (tasks.length > 0 && mcqs.length === 0) return 'Practical';
   return 'MCQ + Practical';
+}
+
+/** "Part A: add 3 more Multiple Choice (MCQ) questions." */
+function describeMissing({ section, group, missing }: GroupProgress) {
+  const word = sectionTypes[group.type].group === 'Practical' ? 'task' : 'question';
+  return `${section.name}: add ${missing} more ${sectionTypes[group.type].label} ${word}${missing === 1 ? '' : 's'}.`;
 }
 
 /** What must be fixed before a set can be sent for approval. */
 export function getPaperIssues(paper: PaperSet): string[] {
   const issues: string[] = [];
   if (paper.title.trim().length < 3) issues.push('Enter a paper title of at least 3 characters.');
-  if (paper.mcqs.length + paper.tasks.length === 0) {
+  if (usesPattern(paper)) {
+    // The set must match the exam's pattern exactly.
+    for (const row of getPatternProgress(paper)) {
+      if (row.missing > 0) issues.push(describeMissing(row));
+    }
+  } else if (countItems(paper) === 0) {
     issues.push('Add at least one question or practical task.');
   }
   return issues;
 }
+
+/** Marks a question of this group is worth, for display. */
+export const marksEach = (group: QuestionGroup) =>
+  `${group.marksPerQuestion} ${group.marksPerQuestion === 1 ? 'mark' : 'marks'} each${
+    isObjective(group.type) && group.negativeMarks > 0 ? `, −${group.negativeMarks} if wrong` : ''
+  }`;
 
 /** "Set 5" when the exam already has sets up to 4. */
 export function getNextSetName(papers: PaperSet[], exam: string): string {

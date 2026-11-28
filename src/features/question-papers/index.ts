@@ -4,9 +4,11 @@ export { PaperStatusBadge } from './components/PaperStatusBadge';
 export { paperSetters, SAMPLE_EXAM, sampleExams } from './data/sample';
 export { registerPaperListeners } from './model/paperListeners';
 export {
+  countItems,
   createAssignedSet,
   getNextSetName,
   getPaperTotals,
+  getPatternProgress,
   isOwnPaper,
   isSetOfExam,
   practicalApps,

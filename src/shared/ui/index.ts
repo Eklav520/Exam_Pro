@@ -16,6 +16,7 @@ export { PageHeader } from './PageHeader';
 export { EmptyState, PageError, PageLoader } from './PageState';
 export { Pagination } from './Pagination';
 export { ProgressBar } from './ProgressBar';
+export { RichText, RichTextEditor } from './RichTextEditor';
 export { RowMenu } from './RowMenu';
 export { SelectField } from './SelectField';
 export { Stepper } from './Stepper';

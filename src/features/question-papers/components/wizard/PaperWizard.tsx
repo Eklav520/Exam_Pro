@@ -5,26 +5,34 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useStaffRole } from '@/features/staff';
 import { path } from '@/shared/config/paths';
+import { getPatternTotals } from '@/shared/lib/examPattern';
+import type { QuestionGroup } from '@/shared/types';
 import { Alert, Button, Card, ItemTable, PageHeader, Stepper, useToast } from '@/shared/ui';
 import {
   createPaper,
   getNextSetName,
   getPaperIssues,
   getPaperTotals,
+  usesPattern,
   type McqItem,
   type PaperSet,
+  type PatternQuestion,
   type PracticalItem,
 } from '../../model/paper';
 import { paperSaved, paperSubmitted, selectPapers } from '../../model/papersSlice';
 import { PaperSections } from '../PaperSections';
 import { DetailsStep } from './DetailsStep';
 import { McqDialog } from './McqDialog';
+import { PatternQuestionDialog } from './PatternQuestionDialog';
+import { SectionQuestionsStep } from './SectionQuestionsStep';
 import { TaskDialog } from './TaskDialog';
 
-const steps = ['Paper Details', 'Part A – MCQ', 'Part B – Practical', 'Review'] as const;
+const freeSteps = ['Paper Details', 'Part A – MCQ', 'Part B – Practical', 'Review'] as const;
 
 type OpenDialog =
-  { type: 'mcq'; item: McqItem | null } | { type: 'task'; item: PracticalItem | null };
+  | { type: 'mcq'; item: McqItem | null }
+  | { type: 'task'; item: PracticalItem | null }
+  | { type: 'pattern'; group: QuestionGroup; slot: string; item: PatternQuestion | null };
 
 function upsert<Item extends { id: string }>(items: Item[], item: Item): Item[] {
   return items.some((existing) => existing.id === item.id)
@@ -48,7 +56,20 @@ export function PaperWizard({ initial }: { initial: PaperSet }) {
   const [dialog, setDialog] = useState<OpenDialog | null>(null);
   const [showTitleError, setShowTitleError] = useState(false);
 
+  // A set assigned with the exam's pattern has a step per part of the pattern.
+  const sections = usesPattern(paper) ? (paper.pattern ?? []) : [];
+  const steps = usesPattern(paper)
+    ? [
+        'Paper Details',
+        ...sections.map(
+          (section) => `${section.name}${section.title ? ` – ${section.title}` : ''}`,
+        ),
+        'Review',
+      ]
+    : freeSteps;
   const isReview = step === steps.length - 1;
+  const required = usesPattern(paper) ? getPatternTotals(sections) : null;
+  const patternSection = step > 0 && !isReview ? sections[step - 1] : undefined;
   const issues = getPaperIssues(paper);
   const totals = getPaperTotals(paper);
   const titleError =
@@ -57,7 +78,9 @@ export function PaperWizard({ initial }: { initial: PaperSet }) {
   const change = (update: Partial<PaperSet>) => setPaper({ ...paper, ...update });
 
   /** Questions take time to write, so they are saved straight away. */
-  const changeItems = (update: Pick<PaperSet, 'mcqs'> | Pick<PaperSet, 'tasks'>) => {
+  const changeItems = (
+    update: Pick<PaperSet, 'mcqs'> | Pick<PaperSet, 'tasks'> | Pick<PaperSet, 'questions'>,
+  ) => {
     const updated = { ...paper, ...update };
     setPaper(updated);
     dispatch(paperSaved(updated));
@@ -118,7 +141,16 @@ export function PaperWizard({ initial }: { initial: PaperSet }) {
           onTitleChange={(title) => change({ title })}
         />
       )}
-      {step === 1 && (
+      {patternSection && (
+        <SectionQuestionsStep
+          paper={paper}
+          section={patternSection}
+          onAdd={(group, slot) => setDialog({ type: 'pattern', group, slot, item: null })}
+          onEdit={(group, item, slot) => setDialog({ type: 'pattern', group, slot, item })}
+          onDelete={(item) => changeItems({ questions: remove(paper.questions ?? [], item.id) })}
+        />
+      )}
+      {sections.length === 0 && step === 1 && (
         <ItemTable
           title="Part A – Multiple Choice Questions"
           itemName="Question"
@@ -144,7 +176,7 @@ export function PaperWizard({ initial }: { initial: PaperSet }) {
           ]}
         />
       )}
-      {step === 2 && (
+      {sections.length === 0 && step === 2 && (
         <ItemTable
           title="Part B – Practical Tasks"
           itemName="Task"
@@ -183,8 +215,11 @@ export function PaperWizard({ initial }: { initial: PaperSet }) {
                 [
                   ['Paper Title', paper.title],
                   ['Examination', paper.exam],
-                  ['Total Questions', totals.questions],
-                  ['Total Marks', totals.marks],
+                  [
+                    'Total Questions',
+                    required ? `${totals.questions} of ${required.questions}` : totals.questions,
+                  ],
+                  ['Total Marks', required ? `${totals.marks} of ${required.marks}` : totals.marks],
                 ] as const
               ).map(([label, value]) => (
                 <div key={label}>
@@ -231,6 +266,25 @@ export function PaperWizard({ initial }: { initial: PaperSet }) {
           onSave={(values) => {
             const id = dialog.item?.id ?? nanoid();
             changeItems({ mcqs: upsert(paper.mcqs, { id, ...values }) });
+            setDialog(null);
+          }}
+        />
+      )}
+      {dialog?.type === 'pattern' && (
+        <PatternQuestionDialog
+          group={dialog.group}
+          slot={dialog.slot}
+          item={dialog.item}
+          onClose={() => setDialog(null)}
+          onSave={(values) => {
+            const { group, item } = dialog;
+            const question: PatternQuestion = {
+              id: item?.id ?? nanoid(),
+              groupId: group.id,
+              type: group.type,
+              ...values,
+            };
+            changeItems({ questions: upsert(paper.questions ?? [], question) });
             setDialog(null);
           }}
         />

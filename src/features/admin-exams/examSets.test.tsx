@@ -105,7 +105,9 @@ describe('assigning paper sets', () => {
     expect(screen.getByLabelText('Examination')).toHaveValue(GROUP1);
     expect(screen.getByText('Send for approval by 20 Dec 2026.')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Exam Pattern to Follow' })).toBeInTheDocument();
-    expect(screen.getByText('Multiple Choice (MCQ): 4 × 1 marks')).toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /Multiple Choice \(MCQ\)/ })).toHaveTextContent(
+      'Multiple Choice (MCQ)41–4',
+    );
 
     // Manoj's Set 2 is not Priya's.
     await user.click(screen.getByRole('link', { name: 'My Paper Sets' }));

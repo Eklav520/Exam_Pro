@@ -1,4 +1,9 @@
-import { getPaperTotals, PaperStatusBadge, type PaperSet } from '@/features/question-papers';
+import {
+  getPaperTotals,
+  getPatternProgress,
+  PaperStatusBadge,
+  type PaperSet,
+} from '@/features/question-papers';
 
 /** What an approver needs to decide. The questions themselves stay with the setter. */
 export function PaperSummary({ paper }: { paper: PaperSet }) {
@@ -7,18 +12,11 @@ export function PaperSummary({ paper }: { paper: PaperSet }) {
     ['Examination', paper.exam],
     ['Paper Title', paper.title],
     ['Prepared By', paper.setter?.name ?? '–'],
-    [
-      'Section A – MCQ',
-      `${paper.mcqs.length} ${paper.mcqs.length === 1 ? 'Question' : 'Questions'}, ${totals.mcqMarks} Marks`,
-    ],
-    [
-      'Section B – Practical',
-      `${paper.tasks.length} ${paper.tasks.length === 1 ? 'Task' : 'Tasks'}, ${totals.taskMarks} Marks`,
-    ],
+    ...partsOf(paper),
     ['Total', `${totals.questions} Questions, ${totals.marks} Marks`],
     ['Submitted On', paper.submittedOn ?? '–'],
     ['Last Updated', paper.updatedAt],
-  ] as const;
+  ];
 
   return (
     <section className="min-w-0 rounded-xl border border-line p-5">
@@ -42,4 +40,29 @@ export function PaperSummary({ paper }: { paper: PaperSet }) {
       )}
     </section>
   );
+}
+
+const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
+
+/** One line per part: of the exam's pattern, or MCQ and Practical for older sets. */
+function partsOf(paper: PaperSet): [string, string][] {
+  if (paper.pattern?.length) {
+    const progress = getPatternProgress(paper);
+    return paper.pattern.map((section) => {
+      const rows = progress.filter((row) => row.section.id === section.id);
+      const written = rows.reduce((sum, row) => sum + row.questions.length, 0);
+      const required = rows.reduce((sum, row) => sum + row.group.questionCount, 0);
+      const marks = rows.reduce(
+        (sum, row) => sum + row.questions.length * row.group.marksPerQuestion,
+        0,
+      );
+      const label = `${section.name}${section.title ? ` – ${section.title}` : ''}`;
+      return [label, `${written} of ${plural(required, 'Question')}, ${marks} Marks`];
+    });
+  }
+  const totals = getPaperTotals(paper);
+  return [
+    ['Section A – MCQ', `${plural(paper.mcqs.length, 'Question')}, ${totals.mcqMarks} Marks`],
+    ['Section B – Practical', `${plural(paper.tasks.length, 'Task')}, ${totals.taskMarks} Marks`],
+  ];
 }

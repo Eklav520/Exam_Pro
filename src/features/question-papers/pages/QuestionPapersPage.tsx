@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/app/hooks';
 import { useCurrentUser } from '@/features/auth';
 import { to } from '@/shared/config/paths';
+import { getPatternTotals } from '@/shared/lib/examPattern';
 import { formatDate } from '@/shared/lib/format';
 import {
   Badge,
@@ -12,6 +13,7 @@ import {
   FilterBar,
   IconButton,
   PageHeader,
+  ProgressBar,
   SelectField,
   type Column,
 } from '@/shared/ui';
@@ -62,18 +64,13 @@ export function QuestionPapersPage() {
     {
       header: 'Paper Title',
       cell: (paper) => (
-        <span className="block max-w-xs min-w-48 whitespace-normal">
+        <span className="block max-w-sm min-w-56 whitespace-normal">
           <span className="block font-medium">{paper.title}</span>
           <span className="text-sm text-muted">{paper.exam}</span>
         </span>
       ),
     },
-    {
-      header: 'Questions',
-      align: 'center',
-      cell: (paper) => getPaperTotals(paper).questions,
-    },
-    { header: 'Marks', align: 'center', cell: (paper) => getPaperTotals(paper).marks },
+    { header: 'Progress', cell: (paper) => <Progress paper={paper} /> },
     { header: 'Due Date', cell: (paper) => (paper.dueDate ? formatDate(paper.dueDate) : '–') },
     {
       header: 'Status',
@@ -156,5 +153,20 @@ export function QuestionPapersPage() {
         </>
       )}
     </>
+  );
+}
+
+function Progress({ paper }: { paper: PaperSet }) {
+  const totals = getPaperTotals(paper);
+  if (!paper.pattern?.length) return `${totals.questions} questions`;
+  const required = getPatternTotals(paper.pattern).questions;
+  const percent = required > 0 ? Math.round((totals.questions / required) * 100) : 0;
+  return (
+    <div className="w-40">
+      <p className="mb-1 text-sm">
+        {totals.questions} of {required} questions
+      </p>
+      <ProgressBar label={`${paper.name} progress`} percent={percent} />
+    </div>
   );
 }

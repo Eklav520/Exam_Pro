@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
   assignmentRemoved,
+  countItems,
   createAssignedSet,
   getNextSetName,
   isSetOfExam,
@@ -32,8 +33,6 @@ import {
 } from '@/shared/ui';
 import { useGetAdminExamQuery } from '../api/adminExamsApi';
 import { AssignSetDialog, type Assignment } from '../components/AssignSetDialog';
-
-const hasWork = (paper: PaperSet) => paper.mcqs.length + paper.tasks.length > 0;
 
 /** The Admin hands out sets of one exam, each with the exam's pattern, to different setters. */
 export function ExamSetsPage() {
@@ -68,8 +67,13 @@ export function ExamSetsPage() {
     { header: 'Due Date', cell: (paper) => (paper.dueDate ? formatDate(paper.dueDate) : '–') },
     {
       header: 'Progress',
-      cell: (paper) =>
-        hasWork(paper) ? `${paper.mcqs.length + paper.tasks.length} items prepared` : 'Not started',
+      cell: (paper) => {
+        const done = countItems(paper);
+        if (done === 0) return 'Not started';
+        return paper.pattern?.length
+          ? `${done} of ${getPatternTotals(paper.pattern).questions} prepared`
+          : `${done} items prepared`;
+      },
     },
     {
       header: 'Status',
@@ -90,7 +94,7 @@ export function ExamSetsPage() {
             icon={Trash2}
             danger
             // Work a setter has done is never thrown away from here.
-            disabled={paper.status !== 'draft' || hasWork(paper)}
+            disabled={paper.status !== 'draft' || countItems(paper) > 0}
             label={`Remove ${paper.name}`}
             onClick={() => setRemoving(paper)}
           />

@@ -1,10 +1,24 @@
 import clsx from 'clsx';
 import { useState } from 'react';
 import { Tabs } from '@/shared/ui';
-import { getPaperTotals, type McqItem, type PaperSet, type PracticalItem } from '../model/paper';
+import {
+  getPaperTotals,
+  usesPattern,
+  type McqItem,
+  type PaperSet,
+  type PracticalItem,
+} from '../model/paper';
+import { PatternSections } from './PatternSections';
+
+type ReviewedPaper = Pick<PaperSet, 'mcqs' | 'tasks' | 'questions' | 'pattern'>;
 
 /** Read-only questions and answers of a set, for reviewing. */
-export function PaperSections({ paper }: { paper: Pick<PaperSet, 'mcqs' | 'tasks'> }) {
+export function PaperSections({ paper }: { paper: ReviewedPaper }) {
+  return usesPattern(paper) ? <PatternSections paper={paper} /> : <FreeSections paper={paper} />;
+}
+
+/** Sets prepared before exams had patterns: MCQs and practical tasks. */
+function FreeSections({ paper }: { paper: ReviewedPaper }) {
   const { mcqs, tasks } = paper;
   const totals = getPaperTotals(paper);
   const [section, setSection] = useState<'a' | 'b'>(mcqs.length === 0 ? 'b' : 'a');
