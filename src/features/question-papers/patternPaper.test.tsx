@@ -149,3 +149,27 @@ describe('paper setters writing to the exam pattern', () => {
     expect(screen.getByRole('button', { name: 'Submit for Approval' })).toBeDisabled();
   });
 });
+
+describe('saving a set to finish later', () => {
+  it('saves the questions written so far and returns to the list', async () => {
+    const [manojSet] = assignSets();
+    const { user, store } = renderApp({
+      route: to.adminPaperEdit(manojSet!.id),
+      as: 'u-setter-2',
+    });
+    await screen.findByRole('heading', { name: 'Edit Question Paper – Set 1' });
+    await next(user);
+    await user.click(screen.getByRole('button', { name: 'Add True / False question' }));
+    await fillIn(user, 'Statement *', 'A byte has 8 bits.');
+    await user.click(within(screen.getByRole('dialog')).getByLabelText('True'));
+    await user.click(screen.getByRole('button', { name: 'Save Question' }));
+
+    await user.click(screen.getByRole('button', { name: 'Save & Close' }));
+    expect(await screen.findByRole('heading', { name: 'My Paper Sets' })).toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /APPSC – Set 1/ })).toHaveTextContent(
+      '1 of 4 questions',
+    );
+    const saved = store.getState().papers.papers.find((paper) => paper.id === manojSet!.id);
+    expect(saved?.status).toBe('draft');
+  });
+});

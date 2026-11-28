@@ -1,5 +1,5 @@
 import { nanoid } from '@reduxjs/toolkit';
-import { ArrowLeft, ArrowRight, BadgeCheck, Send } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BadgeCheck, Clock, Save, Send } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
@@ -50,6 +50,8 @@ export function PaperWizard({ initial }: { initial: PaperSet }) {
   const toast = useToast();
   const role = useStaffRole();
   const papers = useAppSelector(selectPapers);
+  // The store stamps each save; a set opened for the first time has none yet.
+  const savedAt = papers.find((item) => item.id === initial.id)?.updatedAt;
   const [isNew] = useState(() => !papers.some((item) => item.id === initial.id));
   const [paper, setPaper] = useState(initial);
   const [step, setStep] = useState(0);
@@ -105,6 +107,13 @@ export function PaperWizard({ initial }: { initial: PaperSet }) {
     }
     goTo(step + 1);
     toast('Draft saved.');
+  };
+
+  /** Keeps the draft as it is, even half done, so the setter can come back to it. */
+  const handleSaveAndClose = () => {
+    dispatch(paperSaved(paper));
+    toast(`${paper.name} saved as a draft. Continue any time from My Paper Sets.`);
+    void navigate(path.adminQuestionPapers);
   };
 
   const handleSubmit = () => {
@@ -235,28 +244,39 @@ export function PaperWizard({ initial }: { initial: PaperSet }) {
         </div>
       )}
 
-      <div className="mt-6 flex justify-center gap-3 sm:justify-end">
-        <Button
-          variant="secondary"
-          onClick={() => {
-            if (step > 0) goTo(step - 1);
-            else void navigate(path.adminQuestionPapers);
-          }}
-        >
-          <ArrowLeft aria-hidden className="size-4" />
-          {step > 0 ? 'Previous' : 'Back to list'}
-        </Button>
-        {isReview ? (
-          <Button disabled={issues.length > 0} onClick={handleSubmit}>
-            <Send aria-hidden className="size-4" />
-            Submit for Approval
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+        <p className="flex items-center gap-1.5 text-sm text-muted">
+          <Clock aria-hidden className="size-4" />
+          {savedAt ? `Draft saved ${savedAt}` : 'Not saved yet'}
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="ghost" onClick={handleSaveAndClose}>
+            <Save aria-hidden className="size-4" />
+            Save &amp; Close
           </Button>
-        ) : (
-          <Button onClick={handleNext}>
-            Save &amp; Next
-            <ArrowRight aria-hidden className="size-4" />
+          <span aria-hidden className="mx-1 h-6 w-px bg-line" />
+          <Button
+            variant="secondary"
+            onClick={() => {
+              if (step > 0) goTo(step - 1);
+              else void navigate(path.adminQuestionPapers);
+            }}
+          >
+            <ArrowLeft aria-hidden className="size-4" />
+            {step > 0 ? 'Previous' : 'Back to list'}
           </Button>
-        )}
+          {isReview ? (
+            <Button disabled={issues.length > 0} onClick={handleSubmit}>
+              <Send aria-hidden className="size-4" />
+              Submit for Approval
+            </Button>
+          ) : (
+            <Button onClick={handleNext}>
+              Save &amp; Next
+              <ArrowRight aria-hidden className="size-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {dialog?.type === 'mcq' && (
